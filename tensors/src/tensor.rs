@@ -21,3 +21,11 @@ impl<T, const ROW: usize, const COLUMN: usize> Default for Tensor<T, ROW, COLUMN
         }
     }
 }
+
+impl<T, const ROW: usize, const COLUMN: usize> From<[[T; ROW]; COLUMN]> for Tensor<T, ROW, COLUMN>
+    where T: Copy {
+    
+    fn from(array: [[T; ROW]; COLUMN]) -> Self {
+        Self { elements: array }
+    }
+}
