@@ -96,6 +96,42 @@ impl<T, const ROW: usize, const COLUMN: usize> From<[[T; COLUMN]; ROW]> for Tens
     }
 }
 
+// Operators
+macro_rules! from_expression {
+    ($num_type:ty, $row_count:ident, $column_count:ident, $r:ident, $c:ident, $expression:expr) => {
+        {
+            let mut $r = 0usize;
+            let mut $c = 0usize;
+
+            let mut result = Tensor::<T, $row_count, $column_count> {
+                elements: unsafe { [[std::mem::MaybeUninit::uninit().assume_init(); $column_count]; $row_count] }
+            };
+
+            while $r < $row_count {
+                while $c < $column_count {
+                    result.elements[$r][$c] = {$expression};
+                    $c += 1;
+                }
+                $c = 0;
+                $r += 1;
+            }
+
+            result
+        }
+    };
+}
+
+impl<T, const ROW: usize, const COLUMN: usize> crate::ops::HadamardProduct for Tensor<T, ROW, COLUMN>
+    where T: std::ops::Mul<T, Output = T> + Sized + Copy {
+    type Output = Self;
+
+    fn hadamard_product(self, operand: Self) -> Self::Output {
+        from_expression!(T, ROW, COLUMN, r, c, {
+            self.elements[r][c] * operand.elements[r][c]
+        })
+    }
+}
+
 // Elements Iterator
 pub struct HorizontalIter<'a, T, const ROW: usize, const COLUMN: usize> {
     pub(self) tensor: &'a Tensor<T, ROW, COLUMN>,
