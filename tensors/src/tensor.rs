@@ -14,16 +14,16 @@ impl<T, const ROW: usize, const COLUMN: usize> Tensor<T, ROW, COLUMN>
         }
     }
 
-    pub fn hr_iter<'a>(&'a self) -> HorizontalIter<'a, T, ROW, COLUMN> {
-        HorizontalIter::<'a, T, ROW, COLUMN> {
+    pub fn hr_iter<'a>(&'a self) -> crate::TensorHorizontalIter<'a, T, ROW, COLUMN> {
+        crate::TensorHorizontalIter::<'a, T, ROW, COLUMN> {
             tensor: self,
             index_r: 0,
             index_c: 0,
         }
     }
 
-    pub fn vr_iter<'a>(&'a self) -> VerticalIter<'a, T, ROW, COLUMN> {
-        VerticalIter::<'a, T, ROW, COLUMN> {
+    pub fn vr_iter<'a>(&'a self) -> crate::TensorVerticalIter<'a, T, ROW, COLUMN> {
+        crate::TensorVerticalIter::<'a, T, ROW, COLUMN> {
             tensor: self,
             index_r: 0,
             index_c: 0,
