@@ -1,4 +1,4 @@
-use std::fmt::{Debug, Display, Write};
+use std::{fmt::{Debug, Display, Write}, ops::{Index, IndexMut}};
 
 #[derive(Clone, Copy)]
 pub struct Tensor<T, const ROW: usize, const COLUMN: usize> {
@@ -53,6 +53,22 @@ impl<T, const ROW: usize, const COLUMN: usize> Default for Tensor<T, ROW, COLUMN
         Self { 
             elements: [[T::default(); COLUMN]; ROW]
         }
+    }
+}
+
+impl<T, const ROW: usize, const COLUMN: usize> Index<(usize, usize)> for Tensor<T, ROW, COLUMN> {
+    type Output = T;
+
+    #[inline]
+    fn index(&self, index: (usize, usize)) -> &Self::Output {
+        &self.elements[index.1][index.0]
+    }
+}
+
+impl<T, const ROW: usize, const COLUMN: usize> IndexMut<(usize, usize)> for Tensor<T, ROW, COLUMN> {
+    #[inline]
+    fn index_mut(&mut self, index: (usize, usize)) -> &mut Self::Output {
+        &mut self.elements[index.0][index.1]
     }
 }
 
