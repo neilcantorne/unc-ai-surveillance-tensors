@@ -9,7 +9,7 @@ fn test_tensor() {
         0.0f64, 2.0f64, 1.0f64, 0.0f64 |
         0.0f64, 0.0f64, 0.0f64, 1.0f64);
 
-    assert!(matrix[(1, 2)] == 2.0,
+    assert!(matrix[(2, 1)] == 2.0,
         "Erroneous Tensor index operation");
 
     assert!(format!("{:.2}", matrix) == "[1.00, 0.00, 0.00, 0.00 | 0.00, 1.00, 0.00, 0.00 | 0.00, 2.00, 1.00, 0.00 | 0.00, 0.00, 0.00, 1.00]",

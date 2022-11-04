@@ -77,7 +77,7 @@ impl<T, const ROW: usize, const COLUMN: usize> Index<(usize, usize)> for Tensor<
 
     #[inline]
     fn index(&self, index: (usize, usize)) -> &Self::Output {
-        &self.elements[index.1][index.0]
+        &self.elements[index.0][index.1]
     }
 }
 
