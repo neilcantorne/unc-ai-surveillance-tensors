@@ -27,6 +27,22 @@ impl<T, const ROW: usize, const COLUMN: usize> Tensor<T, ROW, COLUMN>
     }
 }
 
+impl<T> Tensor<T, 1, 2> where T: Copy {
+    #[inline]
+    pub fn x(&self) -> T { self.0[0][1] }
+    #[inline]
+    pub fn y(&self) -> T { self.0[0][2] }
+}
+
+impl<T> Tensor<T, 1, 3> where T: Copy {
+    #[inline]
+    pub fn x(&self) -> T { self.0[0][1] }
+    #[inline]
+    pub fn y(&self) -> T { self.0[0][2] }
+    #[inline]
+    pub fn z(&self) -> T { self.0[0][3] }
+}
+
 impl<T, const ROW: usize, const COLUMN: usize> Display for Tensor<T, ROW, COLUMN>
     where T: Display {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -153,6 +169,22 @@ impl<T, const ROW: usize, const COLUMN: usize> crate::ops::DotProduct for Tensor
         }
 
         sum
+    }
+}
+
+impl<T> crate::ops::CrossProduct for Tensor<T, 1, 3>
+    where T: std::ops::Mul<T, Output = T> +
+    std::ops::Sub<T, Output = T> + Sized + Copy {
+    type Output = Self;
+
+    fn cross(self, operand: Self) -> Self::Output {
+        Self(
+            [[
+                self.y() * operand.z() - operand.z() * self.y(),
+                self.z() * operand.x() - operand.x() * self.z(),
+                self.x() * operand.y() - operand.y() * self.x() 
+            ]]
+        )
     }
 }
 
