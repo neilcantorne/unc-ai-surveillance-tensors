@@ -16,7 +16,7 @@ pub trait DotProduct {
     fn dot(self, operand: Self) -> Self::Output;
 }
 
-pub trait TransposeProduct {
+pub trait Transpose {
     type Output: Sized;
 
     fn transpose(self) -> Self::Output;
