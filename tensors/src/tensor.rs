@@ -1,17 +1,13 @@
 use std::{fmt::{Debug, Display, Write}, ops::{Index, IndexMut}};
 
 #[derive(Clone, Copy)]
-pub struct Tensor<T, const ROW: usize, const COLUMN: usize> {
-    elements: [[T; COLUMN]; ROW]
-}
+pub struct Tensor<T, const ROW: usize, const COLUMN: usize>([[T; COLUMN]; ROW]);
 
 impl<T, const ROW: usize, const COLUMN: usize> Tensor<T, ROW, COLUMN> 
     where T: Copy {
 
     pub fn filled_with(value: T) -> Self {
-        Self {
-            elements: [[value; COLUMN]; ROW]
-        }
+        Self([[value; COLUMN]; ROW])
     }
 
     pub fn hr_iter<'a>(&'a self) -> crate::TensorHorizontalIter<'a, T, ROW, COLUMN> {
@@ -40,7 +36,7 @@ impl<T, const ROW: usize, const COLUMN: usize> Display for Tensor<T, ROW, COLUMN
         f.write_char('[')?;
 
         loop {
-            self.elements[r][c].fmt(f)?;
+            self.0[r][c].fmt(f)?;
             
             c += 1;
 
@@ -66,9 +62,7 @@ impl<T, const ROW: usize, const COLUMN: usize> Debug for Tensor<T, ROW, COLUMN>
 impl<T, const ROW: usize, const COLUMN: usize> Default for Tensor<T, ROW, COLUMN>
     where T: Default + Copy + Sized {
     fn default() -> Self {
-        Self { 
-            elements: [[T::default(); COLUMN]; ROW]
-        }
+        Self([[T::default(); COLUMN]; ROW])
     }
 }
 
@@ -77,14 +71,14 @@ impl<T, const ROW: usize, const COLUMN: usize> Index<(usize, usize)> for Tensor<
 
     #[inline]
     fn index(&self, index: (usize, usize)) -> &Self::Output {
-        &self.elements[index.0][index.1]
+        &self.0[index.0][index.1]
     }
 }
 
 impl<T, const ROW: usize, const COLUMN: usize> IndexMut<(usize, usize)> for Tensor<T, ROW, COLUMN> {
     #[inline]
     fn index_mut(&mut self, index: (usize, usize)) -> &mut Self::Output {
-        &mut self.elements[index.0][index.1]
+        &mut self.0[index.0][index.1]
     }
 }
 
@@ -93,14 +87,14 @@ impl<T, const COLUMN: usize> Index<usize> for Tensor<T, 1, COLUMN> {
 
     #[inline]
     fn index(&self, index: usize) -> &Self::Output {
-        &self.elements[0][index]
+        &self.0[0][index]
     }
 }
 
 impl<T, const COLUMN: usize> IndexMut<usize> for Tensor<T, 1, COLUMN> {
     #[inline]
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        &mut self.elements[0][index]
+        &mut self.0[0][index]
     }
 }
 
@@ -108,7 +102,7 @@ impl<T, const ROW: usize, const COLUMN: usize> From<[[T; COLUMN]; ROW]> for Tens
     where T: Copy {
     
     fn from(array: [[T; COLUMN]; ROW]) -> Self {
-        Self { elements: array }
+        Self (array)
     }
 }
 
@@ -119,13 +113,13 @@ macro_rules! from_expression {
             let mut $r = 0usize;
             let mut $c = 0usize;
 
-            let mut result = Tensor::<T, $row_count, $column_count> {
-                elements: unsafe { [[std::mem::MaybeUninit::uninit().assume_init(); $column_count]; $row_count] }
-            };
+            let mut result = Tensor::<T, $row_count, $column_count> (
+                unsafe { [[std::mem::MaybeUninit::uninit().assume_init(); $column_count]; $row_count] }
+            );
 
             while $r < $row_count {
                 while $c < $column_count {
-                    result.elements[$r][$c] = {$expression};
+                    result.0[$r][$c] = {$expression};
                     $c += 1;
                 }
                 $c = 0;
@@ -151,7 +145,7 @@ impl<T, const ROW: usize, const COLUMN: usize> crate::ops::DotProduct for Tensor
 
         while r < ROW {
             while c < COLUMN {
-                sum += self.elements[r][c] * operand.elements[r][c];
+                sum += self.0[r][c] * operand.0[r][c];
                 c += 1;
             }
             c = 0;
@@ -168,7 +162,7 @@ impl<T, const ROW: usize, const COLUMN: usize> crate::ops::HadamardProduct for T
 
     fn hadamard_product(self, operand: Self) -> Self::Output {
         from_expression!(T, ROW, COLUMN, r, c, {
-            self.elements[r][c] * operand.elements[r][c]
+            self.0[r][c] * operand.0[r][c]
         })
     }
 }
@@ -193,7 +187,7 @@ impl<'a, T, const ROW: usize, const COLUMN: usize> Iterator for HorizontalIter<'
         }
 
         let next =  Some((
-            &self.tensor.elements[self.index_r][self.index_c],
+            &self.tensor.0[self.index_r][self.index_c],
             self.index_r,
             self.index_c
         ));
@@ -223,7 +217,7 @@ impl<'a, T, const ROW: usize, const COLUMN: usize> Iterator for VerticalIter<'a,
         }
 
         let next =  Some((
-            &self.tensor.elements[self.index_r][self.index_c],
+            &self.tensor.0[self.index_r][self.index_c],
             self.index_r,
             self.index_c
         ));
