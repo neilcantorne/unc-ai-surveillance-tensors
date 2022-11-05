@@ -137,6 +137,31 @@ macro_rules! from_expression {
     };
 }
 
+impl<T, const ROW: usize, const COLUMN: usize> crate::ops::DotProduct for Tensor<T, ROW, COLUMN>
+    where T: std::ops::Mul<T, Output = T> +
+        std::ops::AddAssign<T> +
+        Default + Sized + Copy {
+    type Output = T;
+
+    fn dot(self, operand: Self) -> Self::Output {
+        let mut sum = T::default();
+
+        let mut r = 0usize;
+        let mut c = 0usize;
+
+        while r < ROW {
+            while c < COLUMN {
+                sum += self.elements[r][c] * operand.elements[r][c];
+                c += 1;
+            }
+            c = 0;
+            r += 1;
+        }
+
+        sum
+    }
+}
+
 impl<T, const ROW: usize, const COLUMN: usize> crate::ops::HadamardProduct for Tensor<T, ROW, COLUMN>
     where T: std::ops::Mul<T, Output = T> + Sized + Copy {
     type Output = Self;
