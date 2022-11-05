@@ -88,6 +88,22 @@ impl<T, const ROW: usize, const COLUMN: usize> IndexMut<(usize, usize)> for Tens
     }
 }
 
+impl<T, const COLUMN: usize> Index<usize> for Tensor<T, 1, COLUMN> {
+    type Output = T;
+
+    #[inline]
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.elements[0][index]
+    }
+}
+
+impl<T, const COLUMN: usize> IndexMut<usize> for Tensor<T, 1, COLUMN> {
+    #[inline]
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.elements[0][index]
+    }
+}
+
 impl<T, const ROW: usize, const COLUMN: usize> From<[[T; COLUMN]; ROW]> for Tensor<T, ROW, COLUMN>
     where T: Copy {
     
