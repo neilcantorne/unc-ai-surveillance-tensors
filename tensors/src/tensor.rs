@@ -199,6 +199,17 @@ impl<T, const ROW: usize, const COLUMN: usize> crate::ops::HadamardProduct for T
     }
 }
 
+impl<T, const ROW: usize, const COLUMN: usize> crate::ops::Transpose for Tensor<T, ROW, COLUMN>
+    where T: Sized + Copy {
+    type Output = Tensor<T, COLUMN, ROW>;
+
+    fn transpose(self) -> Self::Output {
+        from_expression!(T, COLUMN, ROW, r, c, {
+            self.0[c][r]
+        })
+    }
+}
+
 // Elements Iterator
 pub struct HorizontalIter<'a, T, const ROW: usize, const COLUMN: usize> {
     pub(self) tensor: &'a Tensor<T, ROW, COLUMN>,
