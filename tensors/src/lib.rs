@@ -8,6 +8,7 @@ pub use tensor::VerticalIter as TensorVerticalIter;
 
 // Exported modules
 pub mod ops { pub use super::tensor_ops::*; }
+pub mod gpu;
 
 // Exported Literals
 pub use macros::tensor;
