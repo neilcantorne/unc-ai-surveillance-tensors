@@ -13,3 +13,26 @@ extern "C" {
     fn GetProcAddress(handle: *const (), symbol: *const u8) ->  *const();
     fn FreeLibrary(handle: *const());
 }
+
+#[derive(Clone)]
+pub struct BackendError {
+    message: String
+}
+
+impl std::fmt::Display for BackendError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.message)
+    }
+}
+
+impl std::fmt::Debug for BackendError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.message)
+    }
+}
+
+macro_rules! backend_err {
+    ($msg:expr) => {
+        BackendError { message: {$msg}.to_string() }
+    };
+}
