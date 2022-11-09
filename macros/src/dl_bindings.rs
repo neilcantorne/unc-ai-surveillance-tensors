@@ -19,6 +19,8 @@ use syn::{
     ExprParen,
 };
 
+use crate::to_tokens_list::ToTokenList;
+
 #[derive(Clone)]
 pub struct DlBinding {
     functions: Vec<Function>,
@@ -139,5 +141,97 @@ impl Function {
             sig,
             block
         }
+    }
+}
+
+impl DlBinding {
+    pub fn generate_open_cl(&self) -> proc_macro::TokenStream {
+        let callers: ToTokenList<ItemFn> = self.functions.clone()
+            .into_iter()
+            .map(|item| item.caller()).collect();
+
+        proc_macro::TokenStream::from(quote::quote!(
+            struct OpenClInner {
+                library: *const (),
+                // TODO: function pointers
+            }
+
+            impl Drop for OpenClInner {
+                fn drop(&mut self) {
+                    println!("Drop1");
+                    unsafe { dlclose(self.library) }
+                }
+            }
+
+            pub struct OpenClLoader {
+                inner: std::sync::Arc<OpenClInner>
+            }
+
+            impl OpenClLoader {
+                fn resolve() -> Result<*const (), BackendError> {
+                    use std::{ fs::read_dir, ffi::CString };
+            
+                    let mut rd = read_dir("/usr/lib/x86_64-linux-gnu/").ok()
+                        .ok_or(backend_err!("Failed to resolve OpenCL"))?;
+            
+                    while let Some(Ok(file)) = rd.next() {
+                        match file.file_type() {
+                            Ok(file_type) =>
+                                if !file_type.is_file() { continue; },
+                            _ => continue,
+                        }
+            
+                        match file.file_name().to_str() {
+                            Some(value) => if value.contains("OpenCL.so") {
+                                let dlname = CString::new(
+                                        file.path().to_str()
+                                        .ok_or(backend_err!("Failed to resolve OpenCL"))?
+                                    ).ok()
+                                    .ok_or(backend_err!("Failed to resolve OpenCL"))?;
+                                
+                                let library = unsafe { dlopen(dlname.into_raw(), 1) };
+                                
+                                if !library.is_null() {
+                                    return Ok(library)
+                                }
+            
+                            },
+                            _ => continue,
+                        };
+                    }
+            
+                    Err(backend_err!("Failed to resolve OpenCL"))
+                }
+            
+                pub fn new() -> Result<Self, BackendError> {
+                    let library = Self::resolve()?;
+            
+                    unsafe {
+                        //TODO: load funcs let fn_cl_get_device_ids = std::mem::transmute(dlsym(library, b"clGetDeviceIDs\0" as *const u8));
+                        
+                        Ok(Self {
+                            inner: std::sync::Arc::new(OpenClInner {
+                                library,
+                                // TODO: function pointers
+                            })
+                        })
+                    }
+                }
+
+                pub fn load(&mut self) -> OpenCl {
+                    OpenCl {
+                        inner: self.inner.clone()
+                    }
+                }
+            }
+
+            pub struct OpenCl {
+                inner: std::sync::Arc<OpenClInner>
+            }
+
+            impl OpenCl {
+                //#callers
+            }
+        ))
     }
 }
