@@ -31,6 +31,14 @@ impl std::fmt::Debug for BackendError {
     }
 }
 
+use std::fmt::format;
+
+macro_rules! failed_load {
+    ($symbol:ident) => {
+        return Err(BackendError { message: format!("Failed to load {}", stringify!($symbol)) })
+    };
+}
+
 macro_rules! backend_err {
     ($msg:expr) => {
         BackendError { message: {$msg}.to_string() }
