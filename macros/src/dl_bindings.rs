@@ -1,7 +1,7 @@
-use proc_macro2::Ident;
+use proc_macro2::{Ident, TokenStream};
 use syn::punctuated::Punctuated;
-use syn::Token;
-use syn::token::{SelfValue, And, Brace, Paren, Dot, Unsafe};
+use syn::{Token, Attribute, AttrStyle, PathArguments};
+use syn::token::{SelfValue, And, Brace, Paren, Dot, Unsafe, Pound, Bracket, Colon2};
 use syn::{
     FnArg,
     Receiver,
@@ -118,7 +118,14 @@ impl Function {
                         expr: Box::new(Expr::Field(
                             ExprField {
                                 attrs: vec![],
-                                base: Box::new(ident_expr!(Ident::new("self", span))),
+                                base: Box::new(Expr::Field(
+                                    ExprField {
+                                        attrs: vec![],
+                                        base: Box::new(ident_expr!(Ident::new("self", span))),
+                                        dot_token: Dot { spans: [span] },
+                                        member:Member::Named(Ident::new("inner", span)),
+                                    })
+                                ),
                                 dot_token: Dot { spans: [span] },
                                 member: Member::Named(self.fnptr.clone()),
                             }
@@ -135,8 +142,25 @@ impl Function {
             stmts: vec![ statement ],
         });
 
+        let mut attr = self.base.attrs.clone();
+        
+        attr.push(Attribute {
+            pound_token: Pound { spans: [span] },
+            style: AttrStyle::Outer,
+            bracket_token: Bracket { span },
+            path: Path { leading_colon: None, segments: {
+                let mut segments = Punctuated::<PathSegment, Colon2>::new();
+                segments.push(PathSegment {
+                    ident: Ident::new("inline", span),
+                    arguments: PathArguments::None,
+                });
+                segments
+            }},
+            tokens: TokenStream::new(),
+        });
+
         syn::ItemFn {
-            attrs: self.base.attrs.clone(),
+            attrs: attr,
             vis: self.base.vis.clone(),
             sig,
             block
@@ -158,7 +182,6 @@ impl DlBinding {
 
             impl Drop for OpenClInner {
                 fn drop(&mut self) {
-                    println!("Drop1");
                     unsafe { dlclose(self.library) }
                 }
             }
@@ -230,7 +253,7 @@ impl DlBinding {
             }
 
             impl OpenCl {
-                //#callers
+                #callers
             }
         ))
     }
