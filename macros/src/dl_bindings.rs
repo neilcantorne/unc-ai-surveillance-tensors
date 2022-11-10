@@ -1,7 +1,9 @@
+use std::str::FromStr;
+
 use proc_macro2::{Ident, TokenStream};
 use syn::punctuated::Punctuated;
-use syn::{Token, Attribute, AttrStyle, PathArguments, Field, Visibility, Type, TypeBareFn, Abi, LitStr, BareFnArg};
-use syn::token::{SelfValue, And, Brace, Paren, Dot, Unsafe, Pound, Bracket, Colon2, Colon, Extern};
+use syn::{Token, Attribute, AttrStyle, PathArguments, Field, Visibility, Type, TypeBareFn, Abi, LitStr, BareFnArg, FieldValue, ExprUnsafe, ExprLet, PatIdent, ExprLit, Lit, LitByteStr, ExprCast, TypePtr, TypePath, ExprIf, ExprMacro, MacroDelimiter};
+use syn::token::{SelfValue, And, Brace, Paren, Dot, Unsafe, Pound, Bracket, Colon2, Colon, Extern, Let, Semi, As, Const, Star, If, Bang};
 use syn::{
     FnArg,
     Receiver,
@@ -55,11 +57,46 @@ struct Function {
     base: ForeignItemFn,
     fnptr_name: Ident,
     abi: String,
+    symbol: String,
+    symbol_bytes: Vec<u8>
 }
 
 impl From<ForeignItemFn> for Function {
-    fn from(item: ForeignItemFn) -> Self {
+    fn from(mut item: ForeignItemFn) -> Self {
+        let mut symbol = item.sig.ident.to_string();
+        let mut remove_index = None;
+
+        for (index, attribute) in item.attrs.iter().enumerate() {
+            if let Some(ident) = attribute.path.get_ident() {
+                if ident.to_string() == "symbol" {
+                    symbol = attribute
+                        .tokens
+                        .to_string();
+
+                    if symbol.is_empty() {
+                        panic!("Invalid symbol")
+                    }
+
+                    symbol.pop();
+                    symbol.remove(0);
+
+                    remove_index = Some(index)
+                }
+            }
+        }
+
+        if let Some(index) = remove_index {
+            item.attrs.remove(index);
+        }
+        
         Self {
+            symbol: symbol.clone(),
+            symbol_bytes: {
+                let mut symbol = symbol.clone();
+                symbol.push('\0');
+
+                symbol.as_bytes().to_vec()
+            },
             fnptr_name: Ident::new(
                 format!("fn_{}", item.sig.ident.to_string()).as_str(),
                 item.sig.ident.span()),
@@ -69,7 +106,7 @@ impl From<ForeignItemFn> for Function {
                 .name
                 .unwrap()
                 .value(),
-            base: item
+            base: item,
         }
     }
 }
@@ -91,6 +128,50 @@ macro_rules! ident_expr {
             })
         }
     };
+}
+
+macro_rules! path_expr {
+    ($span:expr, $($segment:ident)::*) => {
+        Expr::Path(syn::ExprPath {
+            attrs: vec![],
+            qself: None,
+            path: Path {
+                leading_colon: None,
+                segments: {
+                    let mut segments = Punctuated::<PathSegment, Token![::]>::new();
+        
+                    $(
+                        segments.push(PathSegment {
+                            ident: Ident::new(stringify!($segment), {$span}),
+                            arguments: syn::PathArguments::None,
+                        });
+                    )*
+
+                    segments
+                }
+            }
+        })
+    };
+}
+
+macro_rules! define_path {
+    ($span:expr, $($segment:ident)::*) => {
+        Path {
+            leading_colon: None,
+            segments: {
+                let mut segments = Punctuated::<PathSegment, Token![::]>::new();
+    
+                $(
+                    segments.push(PathSegment {
+                        ident: Ident::new(stringify!($segment), {$span}),
+                        arguments: syn::PathArguments::None,
+                    });
+                )*
+
+                segments
+            }
+        }
+    }
 }
 
 impl Function {
@@ -214,6 +295,119 @@ impl Function {
             }),
         }
     }
+
+    pub fn initializer(&self) -> FieldValue {
+        let span = self.fnptr_name.span();
+
+        FieldValue {
+            attrs: vec![],
+            member: Member::Named(self.fnptr_name.clone()),
+            colon_token: Some(Colon { spans: [self.fnptr_name.span()]}),
+            expr: Expr::Unsafe(ExprUnsafe {
+                attrs: vec![],
+                unsafe_token: Unsafe { span },
+                block: Block {
+                    brace_token: Brace { span },
+                    stmts: vec![Stmt::Semi({
+                        Expr::Let(ExprLet{
+                            attrs: vec![],
+                            let_token: Let { span },
+                            pat: Pat::Ident(PatIdent {
+                                attrs: vec![],
+                                by_ref: None,
+                                mutability: None,
+                                ident: self.fnptr_name.clone(),
+                                subpat: None,
+                            }),
+                            eq_token: syn::token::Eq { spans: [span] },
+                            expr: Box::new(
+                                Expr::Call(ExprCall {
+                                    attrs: vec![],
+                                    func: Box::new(ident_expr!(Ident::new("dlsym", span))),
+                                    paren_token: Paren { span },
+                                    args: {
+                                        let mut args = Punctuated::<Expr, Token![,]>::new();
+                                        
+                                        args.push(ident_expr!(Ident::new("library", span)));
+                                        args.push(Expr::Cast(ExprCast{
+                                            attrs: vec![],
+                                            expr: Box::new(Expr::Lit(ExprLit {
+                                                attrs: vec![],
+                                                lit: Lit::ByteStr(LitByteStr::new(&self.symbol_bytes, span)),
+                                            })),
+                                            as_token: As { span },
+                                            ty: Box::new(Type::Ptr(TypePtr{
+                                                star_token: Star { spans: [span] },
+                                                const_token: Some(Const { span }),
+                                                mutability: None,
+                                                elem: Box::new(Type::Path(TypePath {
+                                                    qself: None,
+                                                    path: Path {
+                                                        leading_colon: None,
+                                                        segments: {
+                                                            let mut segments = Punctuated::<PathSegment, Colon2>::new();
+                                                            segments.push(PathSegment {
+                                                                ident: Ident::new("u8", span),
+                                                                arguments: PathArguments::None,
+                                                            });
+                                                            segments
+                                                        },
+                                                    },
+                                                })),
+                                            })),
+                                        }));
+                                        args
+                                    },
+                                })
+                            ),
+                        })
+                    }, Semi { spans: [span] }),
+                    Stmt::Expr(Expr::If(ExprIf {
+                        attrs: vec![],
+                        if_token: If { span },
+                        cond: Box::new(Expr::Call(ExprCall {
+                            attrs: vec![],
+                            func: Box::new(Expr::Field(ExprField {
+                                attrs: vec![],
+                                base: Box::new(ident_expr!(self.fnptr_name.clone())),
+                                dot_token: Dot { spans: [span] },
+                                member: Member::Named(Ident::new("is_null", span)),
+                            })),
+                            paren_token: Paren { span },
+                            args: Punctuated::<Expr, Token![,]>::new(),
+                        })),
+                        then_branch: Block {
+                            brace_token: Brace { span },
+                            stmts: vec![
+                                Stmt::Semi(Expr::Macro(ExprMacro {
+                                    attrs: vec![],
+                                    mac: syn::Macro {
+                                        path: define_path!(span, failed_load),
+                                        bang_token: Bang { spans: [span] },
+                                        delimiter: MacroDelimiter::Paren(Paren { span }),
+                                        tokens: TokenStream::from_str(&self.symbol).unwrap(),
+                                    },
+                                }), Semi { spans: [span] })
+                            ]
+                        },
+                        else_branch: None,
+                    })),
+                    Stmt::Expr(Expr::Call(ExprCall {
+                        attrs: vec![],
+                        func: Box::new(path_expr!(span, std::mem::transmute)),
+                        paren_token: Paren { span },
+                        args: {
+                            let mut args = Punctuated::<Expr, Token![,]>::new();
+
+                            args.push(ident_expr!(self.fnptr_name.clone()));
+
+                            args
+                        },
+                    }))]
+                },
+            }),
+        }
+    }
 }
 
 impl DlBinding {
@@ -225,6 +419,10 @@ impl DlBinding {
         let fn_pointers: Punctuated<Field, Token![,]> = self.functions.clone()
             .into_iter()
             .map(|item| item.fn_pointer()).collect();
+
+        let intializers: Punctuated<FieldValue, Token![,]> = self.functions.clone()
+            .into_iter()
+            .map(|item| item.initializer()).collect();
 
         proc_macro::TokenStream::from(quote::quote!(
             struct OpenClInner {
@@ -281,16 +479,12 @@ impl DlBinding {
                 pub fn new() -> Result<Self, BackendError> {
                     let library = Self::resolve()?;
             
-                    unsafe {
-                        //TODO: load funcs let fn_cl_get_device_ids = std::mem::transmute(dlsym(library, b"clGetDeviceIDs\0" as *const u8));
-                        
-                        Ok(Self {
-                            inner: std::sync::Arc::new(OpenClInner {
-                                library,
-                                // TODO: function pointers
-                            })
+                    Ok(Self {
+                        inner: std::sync::Arc::new(OpenClInner {
+                            library,
+                            #intializers
                         })
-                    }
+                    })
                 }
 
                 pub fn load(&mut self) -> OpenCl {
