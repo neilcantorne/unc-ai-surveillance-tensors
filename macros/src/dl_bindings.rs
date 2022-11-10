@@ -1,7 +1,7 @@
 use proc_macro2::{Ident, TokenStream};
 use syn::punctuated::Punctuated;
-use syn::{Token, Attribute, AttrStyle, PathArguments};
-use syn::token::{SelfValue, And, Brace, Paren, Dot, Unsafe, Pound, Bracket, Colon2};
+use syn::{Token, Attribute, AttrStyle, PathArguments, Field, Visibility, Type, TypeBareFn, Abi, LitStr, BareFnArg};
+use syn::token::{SelfValue, And, Brace, Paren, Dot, Unsafe, Pound, Bracket, Colon2, Colon, Extern};
 use syn::{
     FnArg,
     Receiver,
@@ -35,7 +35,13 @@ impl syn::parse::Parse for DlBinding {
         for item in &externs.items {
             match item {
                 syn::ForeignItem::Fn(fn_item) 
-                    => functions.push(Function::from(fn_item.clone())),
+                    => functions.push({
+                        let mut fn_item = fn_item.clone();
+                        if fn_item.sig.abi.is_none() {
+                            fn_item.sig.abi = Some(externs.abi.clone());
+                        }
+                        Function::from(fn_item)
+                    }),
                 _ => continue,
             }
         }
@@ -47,15 +53,22 @@ impl syn::parse::Parse for DlBinding {
 #[derive(Clone)]
 struct Function {
     base: ForeignItemFn,
-    fnptr: Ident,
+    fnptr_name: Ident,
+    abi: String,
 }
 
 impl From<ForeignItemFn> for Function {
     fn from(item: ForeignItemFn) -> Self {
         Self {
-            fnptr: Ident::new(
+            fnptr_name: Ident::new(
                 format!("fn_{}", item.sig.ident.to_string()).as_str(),
                 item.sig.ident.span()),
+            abi: item.sig.abi
+                .clone()
+                .expect("Please specify ABI")
+                .name
+                .unwrap()
+                .value(),
             base: item
         }
     }
@@ -127,7 +140,7 @@ impl Function {
                                     })
                                 ),
                                 dot_token: Dot { spans: [span] },
-                                member: Member::Named(self.fnptr.clone()),
+                                member: Member::Named(self.fnptr_name.clone()),
                             }
                         ))
                     }
@@ -166,6 +179,41 @@ impl Function {
             block
         }
     }
+
+    pub fn fn_pointer(&self) -> Field {
+        let span = self.fnptr_name.span();
+
+        Field {
+            attrs: vec![],
+            vis: Visibility::Inherited,
+            ident: Some(self.fnptr_name.clone()),
+            colon_token: Some(Colon{ spans: [span] }),
+            ty: Type::BareFn(TypeBareFn {
+                lifetimes: None,
+                unsafety: None,
+                abi: Some(Abi{
+                    extern_token: Extern { span },
+                    name: Some(LitStr::new(&self.abi, span)),
+                }),
+                fn_token: syn::token::Fn { span },
+                paren_token: Paren { span },
+                inputs: self.base.sig.inputs.iter().filter_map(|arg| {
+                    if let FnArg::Typed(arg) = arg {
+                        return Some(
+                            BareFnArg {
+                                attrs: arg.attrs.clone(),
+                                name: None,
+                                ty: *arg.ty.clone(),
+                            }
+                        );
+                    }
+                    None
+                }).collect(),
+                variadic: self.base.sig.variadic.clone(),
+                output: self.base.sig.output.clone(),
+            }),
+        }
+    }
 }
 
 impl DlBinding {
@@ -174,10 +222,14 @@ impl DlBinding {
             .into_iter()
             .map(|item| item.caller()).collect();
 
+        let fn_pointers: Punctuated<Field, Token![,]> = self.functions.clone()
+            .into_iter()
+            .map(|item| item.fn_pointer()).collect();
+
         proc_macro::TokenStream::from(quote::quote!(
             struct OpenClInner {
                 library: *const (),
-                // TODO: function pointers
+                #fn_pointers
             }
 
             impl Drop for OpenClInner {
