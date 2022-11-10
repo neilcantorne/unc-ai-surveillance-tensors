@@ -1,10 +1,29 @@
 use std::str::FromStr;
 
-use proc_macro2::{Ident, TokenStream};
+use proc_macro2::{ Ident, TokenStream };
 use syn::punctuated::Punctuated;
-use syn::{Token, Attribute, AttrStyle, PathArguments, Field, Visibility, Type, TypeBareFn, Abi, LitStr, BareFnArg, FieldValue, ExprUnsafe, ExprLet, PatIdent, ExprLit, Lit, LitByteStr, ExprCast, TypePtr, TypePath, ExprIf, ExprMacro, MacroDelimiter};
-use syn::token::{SelfValue, And, Brace, Paren, Dot, Unsafe, Pound, Bracket, Colon2, Colon, Extern, Let, Semi, As, Const, Star, If, Bang};
+use syn::token::{
+    SelfValue,
+    And,
+    Brace,
+    Paren,
+    Dot,
+    Unsafe,
+    Pound,
+    Bracket,
+    Colon2,
+    Colon,
+    Extern,
+    Let,
+    Semi,
+    As,
+    Const,
+    Star,
+    If,
+    Bang
+};
 use syn::{
+    Token,
     FnArg,
     Receiver,
     Block,
@@ -19,6 +38,29 @@ use syn::{
     PathSegment,
     Pat,
     ExprParen,
+    Attribute,
+    AttrStyle,
+    PathArguments,
+    Field,
+    Visibility,
+    Type,
+    TypeBareFn,
+    Abi,
+    LitStr,
+    BareFnArg,
+    FieldValue,
+    ExprUnsafe,
+    ExprLet,
+    PatIdent,
+    ExprLit,
+    Lit,
+    LitByteStr,
+    ExprCast,
+    TypePtr,
+    TypePath,
+    ExprIf,
+    ExprMacro,
+    MacroDelimiter
 };
 
 use crate::to_tokens_list::ToTokenList;
