@@ -1,3 +1,7 @@
 // Modules
+mod device;
+mod backend;
 pub(crate) mod reflection;
-pub(crate) mod backend;
+
+// Exported structs
+pub use device::Device;
