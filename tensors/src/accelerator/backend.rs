@@ -1,3 +1,4 @@
+#[allow(unused)]
 #[cfg(target_family = "unix")]
 #[link(name = "dl", kind = "dylib")]
 extern "C" {
@@ -30,8 +31,6 @@ impl std::fmt::Debug for BackendError {
         f.write_str(&self.message)
     }
 }
-
-use std::fmt::format;
 
 macro_rules! failed_load {
     ($symbol:ident) => {
