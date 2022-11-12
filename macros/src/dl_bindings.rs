@@ -536,6 +536,7 @@ impl DlBinding {
                 }
             }
 
+            #[derive(Clone)]
             pub struct OpenCl {
                 inner: std::sync::Arc<OpenClInner>
             }
