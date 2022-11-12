@@ -468,7 +468,7 @@ impl DlBinding {
 
         proc_macro::TokenStream::from(quote::quote!(
             struct OpenClInner {
-                library: *const (),
+                library: usize,
                 #fn_pointers
             }
 
@@ -478,12 +478,12 @@ impl DlBinding {
                 }
             }
 
-            pub struct OpenClLoader {
+            pub struct OpenClFactory {
                 inner: std::sync::Arc<OpenClInner>
             }
 
-            impl OpenClLoader {
-                fn resolve() -> Result<*const (), BackendError> {
+            impl OpenClFactory {
+                fn resolve() -> Result<usize, BackendError> {
                     use std::{ fs::read_dir, ffi::CString };
             
                     let mut rd = read_dir("/usr/lib/x86_64-linux-gnu/").ok()
@@ -506,7 +506,7 @@ impl DlBinding {
                                 
                                 let library = unsafe { dlopen(dlname.into_raw(), 1) };
                                 
-                                if !library.is_null() {
+                                if !library == 0usize {
                                     return Ok(library)
                                 }
             
@@ -529,7 +529,7 @@ impl DlBinding {
                     })
                 }
 
-                pub fn load(&mut self) -> OpenCl {
+                pub fn create(&mut self) -> OpenCl {
                     OpenCl {
                         inner: self.inner.clone()
                     }
