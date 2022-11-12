@@ -54,6 +54,7 @@ pub enum DeviceType {
 }
 
 #[repr(i32)]
+#[derive(PartialEq)]
 pub enum OpenClErrorCode {
     Success = 0,
     DeviceNotFound = -1,
