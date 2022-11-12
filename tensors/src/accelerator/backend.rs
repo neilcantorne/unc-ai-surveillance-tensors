@@ -2,17 +2,17 @@
 #[cfg(target_family = "unix")]
 #[link(name = "dl", kind = "dylib")]
 extern "C" {
-    fn dlopen(file: *const i8, mode: i32) -> *const ();
-    fn dlsym(handle: *const (), symbol: *const u8) ->  *const();
-    fn dlclose(handle: *const());
+    fn dlopen(file: *const i8, mode: i32) -> usize;
+    fn dlsym(handle: usize, symbol: *const u8) -> *const();
+    fn dlclose(handle: usize);
 }
 
 #[cfg(target_os = "windows")]
 #[link(name = "kernel32", kind = "dylib")]
 extern "C" {
-    fn LoadLibrary(file: *const i8) -> *const ();
-    fn GetProcAddress(handle: *const (), symbol: *const u8) ->  *const();
-    fn FreeLibrary(handle: *const());
+    fn LoadLibrary(file: *const i8) -> usize;
+    fn GetProcAddress(handle: usize, symbol: *const u8) -> *const();
+    fn FreeLibrary(handle: usize);
 }
 
 #[derive(Clone)]
