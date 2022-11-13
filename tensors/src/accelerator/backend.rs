@@ -1,3 +1,5 @@
+use crate::error::ErrorVariants;
+
 #[allow(unused)]
 #[cfg(target_family = "unix")]
 #[link(name = "dl", kind = "dylib")]
@@ -45,6 +47,7 @@ macro_rules! backend_err {
 }
 
 #[repr(u32)]
+#[allow(unused)]
 pub enum DeviceType {
     Default = (1 << 0),
     Cpu = (1 << 1),
@@ -54,7 +57,9 @@ pub enum DeviceType {
 }
 
 #[repr(i32)]
+#[derive(Copy, Clone)]
 #[derive(PartialEq)]
+#[allow(unused)]
 pub enum OpenClErrorCode {
     Success = 0,
     DeviceNotFound = -1,
@@ -119,6 +124,85 @@ pub enum OpenClErrorCode {
     InvalidDeviceQueue = -70,
     InvalidSpecId = -71,
     MaxSizeRestrictionExceeded = -72,
+}
+
+impl OpenClErrorCode {
+    pub fn to_result(&self) -> Result<(), crate::Error> {
+        match self {
+            OpenClErrorCode::Success => Ok(()),
+            _ => Err(crate::Error(ErrorVariants::OpenClError(*self)))
+        }
+    }
+}
+
+impl std::fmt::Debug for OpenClErrorCode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Success => write!(f, "Success"),
+            Self::DeviceNotFound => write!(f, "Device not Found"),
+            Self::DeviceNotAvailable => write!(f, "Device not Available"),
+            Self::CompilerNotAvailable => write!(f, "Compiler not Available"),
+            Self::MemObjectAllocationFailure => write!(f, " Memory Object Allocation Failure"),
+            Self::OutOfResources => write!(f, "Out of Resources"),
+            Self::OutOfHostMemory => write!(f, "Out of Host Memory"),
+            Self::ProfilingInfoNotAvailable => write!(f, "Profiling Information not Available"),
+            Self::MemCopyOverlap => write!(f, " Memory Copy Overlap"),
+            Self::ImageFormatMismatch => write!(f, "Image Format Mismatch"),
+            Self::ImageFormatNotSupported => write!(f, "Image Format not Supported"),
+            Self::BuildProgramFailure => write!(f, "Build Program Failure"),
+            Self::MapFailure => write!(f, "Map Failure"),
+            Self::MisalignedSubBufferOffset => write!(f, "Misaligned Sub Buffer Offset"),
+            Self::ExecStatusErrorForEventsInWaitList => write!(f, "Execute Status Error for Events in Wait List"),
+            Self::CompileProgramFailure => write!(f, "Compile Program Failure"),
+            Self::LinkerNotAvailable => write!(f, "Linker not Available"),
+            Self::LinkProgramFailure => write!(f, "Link Program Failure"),
+            Self::DevicePartitionFailed => write!(f, "Device Partition Failed"),
+            Self::KernelArgInfoNotAvailable => write!(f, "Kernel Argument Information not Available"),
+            Self::InvalidValue => write!(f, "Invalid Value"),
+            Self::InvalidDeviceType => write!(f, "Invalid Device Type"),
+            Self::InvalidPlatform => write!(f, "Invalid Platform"),
+            Self::InvalidDevice => write!(f, "Invalid Device"),
+            Self::InvalidContext => write!(f, "Invalid Context"),
+            Self::InvalidQueueProperties => write!(f, "Invalid Queue Properties"),
+            Self::InvalidCommandQueue => write!(f, "Invalid Command Queue"),
+            Self::InvalidHostPtr => write!(f, "Invalid Host Ptr"),
+            Self::InvalidMemObject => write!(f, "Invalid  Memory Object"),
+            Self::InvalidImageFormatDescriptor => write!(f, "Invalid Image Format Descriptor"),
+            Self::InvalidImageSize => write!(f, "Invalid Image Size"),
+            Self::InvalidSampler => write!(f, "Invalid Sampler"),
+            Self::InvalidBinary => write!(f, "Invalid Binary"),
+            Self::InvalidBuildOptions => write!(f, "Invalid Build Options"),
+            Self::InvalidProgram => write!(f, "Invalid Program"),
+            Self::InvalidProgramExecutable => write!(f, "Invalid Program Executable"),
+            Self::InvalidKernelName => write!(f, "Invalid Kernel Name"),
+            Self::InvalidKernelDefinition => write!(f, "Invalid Kernel Definition"),
+            Self::InvalidKernel => write!(f, "Invalid Kernel"),
+            Self::InvalidArgIndex => write!(f, "Invalid Argument Index"),
+            Self::InvalidArgValue => write!(f, "Invalid Argument Value"),
+            Self::InvalidArgSize => write!(f, "Invalid Argument Size"),
+            Self::InvalidKernelArgs => write!(f, "Invalid Kernel Arguments"),
+            Self::InvalidWorkDimension => write!(f, "Invalid Work Dimension"),
+            Self::InvalidWorkGroupSize => write!(f, "Invalid Work Group Size"),
+            Self::InvalidWorkItemSize => write!(f, "Invalid Work Item Size"),
+            Self::InvalidGlobalOffset => write!(f, "Invalid Global Offset"),
+            Self::InvalidEventWaitList => write!(f, "Invalid Event Wait List"),
+            Self::InvalidEvent => write!(f, "Invalid Event"),
+            Self::InvalidOperation => write!(f, "Invalid Operation"),
+            Self::InvalidGlObject => write!(f, "Invalid GL Object"),
+            Self::InvalidBufferSize => write!(f, "Invalid Buffer Size"),
+            Self::InvalidMipLevel => write!(f, "Invalid Mip Level"),
+            Self::InvalidGlobalWorkSize => write!(f, "Invalid Global Work Size"),
+            Self::InvalidProperty => write!(f, "Invalid Property"),
+            Self::InvalidImageDescriptor => write!(f, "Invalid Image Descriptor"),
+            Self::InvalidCompilerOptions => write!(f, "Invalid Compiler Options"),
+            Self::InvalidLinkerOptions => write!(f, "Invalid Linker Options"),
+            Self::InvalidDevicePartitionCount => write!(f, "Invalid Device Partition Count"),
+            Self::InvalidPipeSize => write!(f, "Invalid Pipe Size"),
+            Self::InvalidDeviceQueue => write!(f, "Invalid Device Queue"),
+            Self::InvalidSpecId => write!(f, "Invalid Specified ID"),
+            Self::MaxSizeRestrictionExceeded => write!(f, "Max Size Restriction Exceeded"),
+        }
+    }
 }
 
 #[macros::bind_open_cl]
