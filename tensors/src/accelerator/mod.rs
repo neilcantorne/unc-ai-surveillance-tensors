@@ -8,3 +8,4 @@ pub(crate) mod reflection;
 pub use device::Device;
 pub use factory::Factory;
 pub(crate) use backend::BackendError;
+pub(crate) use backend::OpenClErrorCode;
