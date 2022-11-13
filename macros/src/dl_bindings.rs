@@ -497,19 +497,18 @@ impl DlBinding {
                         }
             
                         match file.file_name().to_str() {
-                            Some(value) => if value.contains("OpenCL.so") {
+                            Some(value) => if value.contains("OpenCL.so.") {
                                 let dlname = CString::new(
-                                        file.path().to_str()
-                                        .ok_or(backend_err!("Failed to resolve OpenCL"))?
-                                    ).ok()
-                                    .ok_or(backend_err!("Failed to resolve OpenCL"))?;
+                                    file.path().to_str()
+                                    .ok_or(backend_err!("Failed to resolve OpenCL"))?
+                                ).ok()
+                                .ok_or(backend_err!("Failed to resolve OpenCL"))?;
                                 
                                 let library = unsafe { dlopen(dlname.into_raw(), 1) };
                                 
-                                if !library == 0usize {
+                                if library != 0usize {
                                     return Ok(library)
                                 }
-            
                             },
                             _ => continue,
                         };
