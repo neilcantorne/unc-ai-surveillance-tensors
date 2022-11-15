@@ -35,3 +35,15 @@ impl<T: Sized> Drop for ArrayBuffer<T> {
         }
     }
 }
+
+impl ArrayBuffer<i8> {
+    pub fn rust_string(&self) -> crate::Result<String> {
+        Ok(unsafe {
+            std::ffi::CStr::from_ptr(self.ptr)
+            .to_str()
+            .ok()
+            .ok_or(crate::Error::from("Failed to convert from C-String".to_owned()))?
+            .to_owned()
+        })
+    }
+}
