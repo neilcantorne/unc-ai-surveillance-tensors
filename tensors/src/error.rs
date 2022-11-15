@@ -25,6 +25,12 @@ impl From<String> for Error {
     }
 }
 
+impl From<&str> for Error {
+    fn from(message: &str) -> Self {
+        Self(ErrorVariants::Message(message.to_owned()))
+    }
+}
+
 impl Debug for Error {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match &self.0 {
