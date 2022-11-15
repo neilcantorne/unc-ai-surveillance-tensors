@@ -15,3 +15,11 @@ impl<T: Sized> ArrayBuffer<T> {
         }
     }
 }
+
+impl<T: Sized> Drop for ArrayBuffer<T> {
+    fn drop(&mut self) {
+        unsafe {
+            std::alloc::dealloc(self.ptr as *mut u8, self.layout)
+        }
+    }
+}
