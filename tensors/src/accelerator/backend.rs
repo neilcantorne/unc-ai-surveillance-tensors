@@ -46,7 +46,7 @@ macro_rules! backend_err {
     };
 }
 
-#[repr(u32)]
+#[repr(u64)]
 #[allow(unused)]
 pub enum DeviceType {
     Default = (1 << 0),
