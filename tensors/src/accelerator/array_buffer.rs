@@ -21,6 +21,11 @@ impl<T: Sized> ArrayBuffer<T> {
     pub fn size(&self) -> usize {
         self.layout.size() / std::mem::size_of::<T>()
     }
+
+    #[inline]
+    pub fn as_mut_ptr(&mut self) -> *mut T {
+        self.ptr
+    }
 }
 
 impl<T: Sized> Drop for ArrayBuffer<T> {
