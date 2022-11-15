@@ -8,6 +8,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Clone)]
 pub(crate) enum ErrorVariants {
+    Message(String),
     BackendError(crate::accelerator::BackendError),
     OpenClError(crate::accelerator::OpenClErrorCode)
 }
@@ -18,6 +19,12 @@ impl From<BackendError> for Error {
     }
 }
 
+impl From<String> for Error {
+    fn from(message: String) -> Self {
+        Self(ErrorVariants::Message(message))
+    }
+}
+
 impl Debug for Error {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match &self.0 {
@@ -25,6 +32,7 @@ impl Debug for Error {
                 => <BackendError as Debug>::fmt(backend_error, f),
             ErrorVariants::OpenClError(open_cl_error_code)
                 => <crate::accelerator::OpenClErrorCode as Debug>::fmt(open_cl_error_code, f),
+            ErrorVariants::Message(message) => <String as Debug>::fmt(message, f),
         }
     }
 }
