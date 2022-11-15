@@ -78,9 +78,25 @@ impl DeviceInner for OpenClDevice {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, PartialEq)]
 pub enum DeviceType {
     Cpu,
     Gpu,
     Accelerator,
+}
+
+impl std::fmt::Debug for DeviceType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        <Self as std::fmt::Display>::fmt(&self, f)
+    }
+}
+
+impl std::fmt::Display for DeviceType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            DeviceType::Cpu => f.write_str("CPU"),
+            DeviceType::Gpu => f.write_str("GPU"),
+            DeviceType::Accelerator => f.write_str("Accelerator"),
+        }
+    }
 }
