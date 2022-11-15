@@ -1,5 +1,3 @@
-use std::ffi::CStr;
-
 use super::backend::{OpenCl, ParamName};
 
 pub struct Device {
@@ -25,32 +23,29 @@ pub(crate) struct OpenClDevice {
 impl DeviceInner for OpenClDevice {
     fn name(&self) -> crate::Result<String> {
         unsafe {
-            let mut size = 0usize;
+            let mut buffer = super::ArrayBuffer::<i8>::new({
+                let mut size = 0usize;
+            
+                self.open_cl.get_device_info(
+                    self.id,
+                    ParamName::DeviceName,
+                    0,
+                    std::ptr::null_mut(),
+                    &mut size)
+                    .to_result()?;
+                
+                size
+            });
             
             self.open_cl.get_device_info(
                 self.id,
                 ParamName::DeviceName,
-                0,
-                std::ptr::null_mut(),
-                &mut size)
-                .to_result()?;
-
-            let mut buffer = Vec::<i8>::with_capacity(size);
-            
-            self.open_cl.get_device_info(
-                self.id,
-                ParamName::DeviceName,
-                size,
+                buffer.size(),
                 buffer.as_mut_ptr() as *mut (),
                 std::ptr::null_mut())
                 .to_result()?;
-            
-            buffer.set_len(size);
 
-            Ok(CStr::from_ptr(buffer.as_mut_ptr())
-            .to_str()
-            .unwrap()
-            .to_owned())
+            buffer.rust_string()
         }
     }
 }
