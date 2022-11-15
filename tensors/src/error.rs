@@ -38,7 +38,7 @@ impl Debug for Error {
                 => <BackendError as Debug>::fmt(backend_error, f),
             ErrorVariants::OpenClError(open_cl_error_code)
                 => <crate::accelerator::OpenClErrorCode as Debug>::fmt(open_cl_error_code, f),
-            ErrorVariants::Message(message) => <String as Debug>::fmt(message, f),
+            ErrorVariants::Message(message) => f.write_str(message),
         }
     }
 }
