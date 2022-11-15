@@ -6,12 +6,18 @@ pub struct Device {
 
 pub(crate) trait DeviceInner {
     fn name(&self) -> crate::Result<String>;
+    fn device_type(&self) -> crate::Result<DeviceType>;
 }
 
 impl Device {
     #[inline(always)]
     pub fn name(&self) -> crate::Result<String> {
         self.inner.name()
+    }
+
+    #[inline(always)]
+    pub fn device_type(&self) -> crate::Result<DeviceType> {
+        self.inner.device_type()
     }
 }
 
@@ -48,4 +54,33 @@ impl DeviceInner for OpenClDevice {
             buffer.rust_string()
         }
     }
+
+    #[allow(invalid_value)]
+    fn device_type(&self) -> crate::Result<DeviceType> {
+        unsafe {
+            let mut buffer = std::mem::MaybeUninit::uninit().assume_init();
+
+            self.open_cl.get_device_info(
+                self.id,
+                ParamName::DeviceType,
+                std::mem::size_of::<super::backend::DeviceType>(),
+                &mut buffer as *mut super::backend::DeviceType as *mut (),
+                std::ptr::null_mut())
+            .to_result()?;
+
+            match buffer {
+                super::backend::DeviceType::Cpu => Ok(DeviceType::Cpu),
+                super::backend::DeviceType::Gpu => Ok(DeviceType::Gpu),
+                super::backend::DeviceType::Accelerator => Ok(DeviceType::Accelerator),
+                _ => Err(crate::Error::from("Invalid Device Type")),
+            }
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum DeviceType {
+    Cpu,
+    Gpu,
+    Accelerator,
 }
