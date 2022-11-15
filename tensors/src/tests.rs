@@ -1,5 +1,15 @@
 use crate::Tensor;
+use crate::accelerator::Factory;
 use crate::tensor;
+
+#[test]
+fn test_open_cl() {
+    let mut factory = Factory::new();
+    let devices = factory.get_devices().unwrap();
+
+    println!("Device: {}", devices.first().unwrap().name().unwrap());
+    println!("Device Type: {}", devices.first().unwrap().device_type().unwrap());
+}
 
 #[test]
 fn test_tensor() {
