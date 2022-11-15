@@ -205,6 +205,20 @@ impl std::fmt::Debug for OpenClErrorCode {
     }
 }
 
+#[repr(u32)]
+#[derive(Copy, Clone)]
+#[derive(PartialEq)]
+#[allow(unused)]
+pub enum ParamName {
+    DeviceType = 0x1000,
+    DeviceMaxComputeUnits = 0x1002,
+    DeviceMaxClockFrequency = 0x100C,
+    DeviceName = 0x102B,
+    DeviceVendor = 0x102C,
+    DriverVersion = 0x102D,
+    DeviceVersion = 0x102F,
+}
+
 #[macros::bind_open_cl]
 extern "C" {
     #[symbol(clGetDeviceIDs)]
@@ -214,4 +228,12 @@ extern "C" {
         num_entries: u32,
         devices: *mut usize,
         num_devices: *mut u32) -> OpenClErrorCode;
+
+    #[symbol(clGetDeviceInfo)]
+    pub fn get_device_info(
+        device: usize,
+        param_name: ParamName,
+        param_value_size: usize,
+        param_value: *mut (),
+        param_value_size_ret: *mut usize) -> OpenClErrorCode;
 }
