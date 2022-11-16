@@ -9,6 +9,7 @@ fn test_open_cl() {
 
     println!("Device: {}", devices.first().unwrap().name().unwrap());
     println!("Device Type: {}", devices.first().unwrap().device_type().unwrap());
+    println!("Device Vendor: {}", devices.first().unwrap().vendor().unwrap());
 }
 
 #[test]

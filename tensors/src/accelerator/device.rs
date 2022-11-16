@@ -7,6 +7,7 @@ pub struct Device {
 pub(crate) trait DeviceInner {
     fn name(&self) -> crate::Result<String>;
     fn device_type(&self) -> crate::Result<DeviceType>;
+    fn vendor(&self) -> crate::Result<String>;
 }
 
 impl Device {
@@ -18,6 +19,11 @@ impl Device {
     #[inline(always)]
     pub fn device_type(&self) -> crate::Result<DeviceType> {
         self.inner.device_type()
+    }
+
+    #[inline(always)]
+    pub fn vendor(&self) -> crate::Result<String> {
+        self.inner.vendor()
     }
 }
 
@@ -74,6 +80,35 @@ impl DeviceInner for OpenClDevice {
                 super::backend::DeviceType::Accelerator => Ok(DeviceType::Accelerator),
                 _ => Err(crate::Error::from("Invalid Device Type")),
             }
+        }
+    }
+
+    #[allow(invalid_value)]
+    fn vendor(&self) -> crate::Result<String> {
+        unsafe {
+            let mut buffer = super::ArrayBuffer::<i8>::new({
+                let mut size = 0usize;
+            
+                self.open_cl.get_device_info(
+                    self.id,
+                    ParamName::DeviceVendor,
+                    0,
+                    std::ptr::null_mut(),
+                    &mut size)
+                    .to_result()?;
+                
+                size
+            });
+
+            self.open_cl.get_device_info(
+                self.id,
+                ParamName::DeviceVendor,
+                buffer.size(),
+                buffer.as_mut_ptr() as *mut (),
+                std::ptr::null_mut())
+            .to_result()?;
+            
+            buffer.rust_string()
         }
     }
 }
