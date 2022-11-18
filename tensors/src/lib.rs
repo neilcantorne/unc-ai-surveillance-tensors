@@ -1,9 +1,11 @@
 mod tensor;
+mod rgb;
 mod tensor_ops;
 mod error;
 
 // Exported Structures
 pub use tensor::Tensor;
+pub use rgb::Rgb;
 pub use tensor::HorizontalIter as TensorHorizontalIter;
 pub use tensor::VerticalIter as TensorVerticalIter;
 pub use error::{ Error, Result };
