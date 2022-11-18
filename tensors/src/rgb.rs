@@ -5,3 +5,10 @@ pub struct Rgb<T>
     pub g: T,
     pub b: T,
 }
+
+impl<T> Default for Rgb<T>
+    where T: Sized + Default {
+    fn default() -> Self {
+        Self { r: Default::default(), g: Default::default(), b: Default::default() }
+    }
+}
