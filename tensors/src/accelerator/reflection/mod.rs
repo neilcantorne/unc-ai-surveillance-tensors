@@ -1,7 +1,8 @@
 // Modules
 mod variable;
-mod struct_info;
 mod identifier;
+mod struct_info;
+mod field_info;
 
 // Exports
 pub use variable::{
@@ -9,5 +10,6 @@ pub use variable::{
     Variable
 };
 
-pub use struct_info::StructInfo;
 pub use identifier::Identifier;
+pub use struct_info::StructInfo;
+pub use field_info::FieldInfo;
