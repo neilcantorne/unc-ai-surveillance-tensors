@@ -4,6 +4,7 @@ mod identifier;
 mod type_info;
 mod struct_info;
 mod field_info;
+mod object_writer;
 
 // Exports
 pub use variable::{
@@ -12,6 +13,7 @@ pub use variable::{
 };
 
 pub use identifier::Identifier;
+pub use object_writer::ObjectWriter;
 pub use type_info::{
     TypeInfo,
     AsKernelType
