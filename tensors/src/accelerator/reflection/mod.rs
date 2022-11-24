@@ -12,6 +12,9 @@ pub use variable::{
 };
 
 pub use identifier::Identifier;
-pub use type_info::TypeInfo;
+pub use type_info::{
+    TypeInfo,
+    AsKernelType
+};
 pub use struct_info::StructInfo;
 pub use field_info::FieldInfo;

@@ -18,3 +18,7 @@ pub enum TypeInfo {
 
     Array { element_type: Box<super::TypeInfo>, size: usize },
 }
+
+pub trait AsKernelType {
+    fn type_info() -> TypeInfo;
+}
