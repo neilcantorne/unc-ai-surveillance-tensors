@@ -55,6 +55,18 @@ impl ObjectWriter {
             })
         }
     }
+
+    #[inline]
+    pub unsafe fn write_unchecked<T: Sized + crate::reflection::AsKernelType>(&mut self, value: T) {
+        *(self.current.cast::<T>().as_mut()) = value.into();
+        self.current = NonNull::new_unchecked(
+            self.current
+            .as_ptr()
+            .cast::<T>()
+            .add(1)
+            .cast()
+        );
+    }
 }
 
 impl Drop for ObjectWriter {
