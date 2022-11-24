@@ -2,7 +2,7 @@
 #[derive(Debug, Clone)]
 pub struct StructInfo {
     pub identifier: super::Identifier,
-    pub field: Vec<super::FieldInfo>
+    pub fields: Vec<super::FieldInfo>
 }
 
 pub trait AsKernelStruct : super::AsKernelType {
