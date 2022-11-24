@@ -16,5 +16,8 @@ pub use type_info::{
     TypeInfo,
     AsKernelType
 };
-pub use struct_info::StructInfo;
+pub use struct_info::{
+    StructInfo,
+    AsKernelStruct
+};
 pub use field_info::FieldInfo;
