@@ -1,6 +1,6 @@
 
 #[derive(Debug, Clone)]
-pub enum DataType {
+pub enum TypeInfo {
     I8,
     I16,
     I32,
@@ -16,5 +16,5 @@ pub enum DataType {
 
     Struct(super::StructInfo),
 
-    Array { element_type: Box<super::DataType>, size: usize },
+    Array { element_type: Box<super::TypeInfo>, size: usize },
 }
