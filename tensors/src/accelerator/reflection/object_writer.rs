@@ -1,6 +1,7 @@
 use std::ptr::NonNull;
 use std::alloc::{
     alloc,
+    dealloc,
     Layout
 };
 
@@ -24,5 +25,13 @@ impl ObjectWriter {
     #[inline]
     pub fn size(&self) -> usize {
         self.layout.size()
+    }
+}
+
+impl Drop for ObjectWriter {
+    fn drop(&mut self) {
+        unsafe {
+            dealloc(self.ptr.as_mut(), self.layout)
+        }
     }
 }
