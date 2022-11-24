@@ -13,6 +13,7 @@ pub use error::{ Error, Result };
 // Exported modules
 pub mod ops { pub use super::tensor_ops::*; }
 pub mod accelerator;
+pub mod reflection { pub use super::accelerator::reflection::*; }
 
 // Exported Literals
 pub use macros::tensor;
