@@ -5,6 +5,14 @@ pub struct StructInfo {
     pub fields: Vec<super::FieldInfo>
 }
 
+impl StructInfo {
+    pub fn memory_size(&self) -> usize {
+        self.fields.iter().fold(0usize, |total, field| {
+            total + field.date_type.memory_size()
+        })
+    }
+}
+
 pub trait AsKernelStruct : super::AsKernelType {
     fn struct_info() -> StructInfo;
 }

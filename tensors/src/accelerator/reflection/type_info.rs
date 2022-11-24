@@ -19,6 +19,23 @@ pub enum TypeInfo {
     Array { element_type: Box<super::TypeInfo>, size: usize },
 }
 
+impl TypeInfo {
+    #[inline]
+    pub fn memory_size(&self) -> usize {
+        match self {
+            TypeInfo::I8 | TypeInfo::U8 => 1,
+            TypeInfo::I16 | TypeInfo::U16 => 2,
+            TypeInfo::I32 | TypeInfo::U32 | TypeInfo::F32  => 4,
+            TypeInfo::I64 | TypeInfo::U64 | TypeInfo::F64 => 8,
+            TypeInfo::Struct(info) => info.memory_size(),
+            TypeInfo::Array {
+                element_type,
+                size
+            } => element_type.memory_size() * size
+        }
+    }
+}
+
 pub trait AsKernelType {
     fn type_info() -> TypeInfo;
 }
