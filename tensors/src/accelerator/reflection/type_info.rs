@@ -38,46 +38,87 @@ impl TypeInfo {
 
 pub trait AsKernelType {
     fn type_info() -> TypeInfo;
+    fn write_to_memory(self, writer: &mut super::ObjectWriter);
 }
 
 impl AsKernelType for i8 {
     fn type_info() -> TypeInfo { TypeInfo::I8 }
+
+    fn write_to_memory(self, writer: &mut super::ObjectWriter) {
+        unsafe { writer.write_unchecked(self); }
+    }
 }
 
 impl AsKernelType for i16 {
     fn type_info() -> TypeInfo { TypeInfo::I16 }
+
+    fn write_to_memory(self, writer: &mut super::ObjectWriter) {
+        unsafe { writer.write_unchecked(self); }
+    }
 }
 
 impl AsKernelType for i32 {
     fn type_info() -> TypeInfo { TypeInfo::I32 }
+
+    fn write_to_memory(self, writer: &mut super::ObjectWriter) {
+        unsafe { writer.write_unchecked(self); }
+    }
 }
 
 impl AsKernelType for i64 {
     fn type_info() -> TypeInfo { TypeInfo::I64 }
+
+    fn write_to_memory(self, writer: &mut super::ObjectWriter) {
+        unsafe { writer.write_unchecked(self); }
+    }
 }
 
 impl AsKernelType for u8 {
     fn type_info() -> TypeInfo { TypeInfo::U8 }
+
+    fn write_to_memory(self, writer: &mut super::ObjectWriter) {
+        unsafe { writer.write_unchecked(self); }
+    }
 }
 
 impl AsKernelType for u16 {
     fn type_info() -> TypeInfo { TypeInfo::U16 }
+
+    fn write_to_memory(self, writer: &mut super::ObjectWriter) {
+        unsafe { writer.write_unchecked(self); }
+    }
 }
 
 impl AsKernelType for u32 {
     fn type_info() -> TypeInfo { TypeInfo::U32 }
+
+    fn write_to_memory(self, writer: &mut super::ObjectWriter) {
+        unsafe { writer.write_unchecked(self); }
+    }
 }
 
 impl AsKernelType for u64 {
     fn type_info() -> TypeInfo { TypeInfo::U64 }
+
+    fn write_to_memory(self, writer: &mut super::ObjectWriter) {
+        unsafe { writer.write_unchecked(self); }
+    }
 }
 
 impl AsKernelType for f32 {
     fn type_info() -> TypeInfo { TypeInfo::F32 }
+
+    fn write_to_memory(self, writer: &mut super::ObjectWriter) {
+        unsafe { writer.write_unchecked(self); }
+    }
 }
 
 impl AsKernelType for f64 {
     fn type_info() -> TypeInfo { TypeInfo::F64 }
+
+    fn write_to_memory(self, writer: &mut super::ObjectWriter) {
+        unsafe { writer.write_unchecked(self); }
+    }
 }
 
 impl<T: AsKernelType, const SIZE: usize> AsKernelType for [T; SIZE] {
@@ -86,5 +127,9 @@ impl<T: AsKernelType, const SIZE: usize> AsKernelType for [T; SIZE] {
             element_type: Box::new(T::type_info()),
             size: SIZE
         }
+    }
+
+    fn write_to_memory(self, writer: &mut super::ObjectWriter) {
+        unsafe { writer.write_unchecked(self); }
     }
 }
