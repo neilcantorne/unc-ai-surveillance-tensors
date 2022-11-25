@@ -1,4 +1,4 @@
-use crate::accelerator::reflection::{
+use crate::reflection::{
     AsKernelStruct,
     AsKernelType,
     StructInfo,
@@ -46,5 +46,9 @@ impl<T> AsKernelStruct for Rgb<T>
                 fields
             },
         }
+    }
+
+    fn write_to_memory(self, writer: &mut crate::reflection::ObjectWriter) {
+        unsafe { writer.write_unchecked(self); }
     }
 }
