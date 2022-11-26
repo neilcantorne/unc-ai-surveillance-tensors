@@ -4,6 +4,7 @@ mod identifier;
 mod type_info;
 mod struct_info;
 mod field_info;
+mod function_info;
 mod implementation_info;
 mod object_writer;
 
@@ -24,4 +25,5 @@ pub use struct_info::{
     AsKernelStruct
 };
 pub use field_info::FieldInfo;
+pub use function_info::FunctionInfo;
 pub use implementation_info::ImplementationInfo;
