@@ -14,6 +14,9 @@ pub enum TypeInfo {
     F32,
     F64,
 
+    Ref(Box<super::TypeInfo>),
+    MutRef(Box<super::TypeInfo>),
+
     Struct(super::StructInfo),
 
     Array { element_type: Box<super::TypeInfo>, size: usize },
@@ -21,17 +24,18 @@ pub enum TypeInfo {
 
 impl TypeInfo {
     #[inline]
-    pub fn memory_size(&self) -> usize {
+    pub fn memory_size(&self, device: &crate::accelerator::Device) -> crate::Result<usize> {
         match self {
-            TypeInfo::I8 | TypeInfo::U8 => 1,
-            TypeInfo::I16 | TypeInfo::U16 => 2,
-            TypeInfo::I32 | TypeInfo::U32 | TypeInfo::F32  => 4,
-            TypeInfo::I64 | TypeInfo::U64 | TypeInfo::F64 => 8,
-            TypeInfo::Struct(info) => info.memory_size(),
+            TypeInfo::I8 | TypeInfo::U8 => Ok(1),
+            TypeInfo::I16 | TypeInfo::U16 => Ok(2),
+            TypeInfo::I32 | TypeInfo::U32 | TypeInfo::F32  => Ok(4),
+            TypeInfo::I64 | TypeInfo::U64 | TypeInfo::F64 => Ok(8),
+            TypeInfo::Struct(info) => info.memory_size(device),
             TypeInfo::Array {
                 element_type,
                 size
-            } => element_type.memory_size() * size
+            } => Ok(element_type.memory_size(device)? * size),
+            TypeInfo::Ref(_) | TypeInfo::MutRef(_) => device.pointer_size(),
         }
     }
 }
