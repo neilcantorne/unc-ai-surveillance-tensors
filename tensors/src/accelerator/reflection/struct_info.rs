@@ -6,10 +6,14 @@ pub struct StructInfo {
 }
 
 impl StructInfo {
-    pub fn memory_size(&self) -> usize {
-        self.fields.iter().fold(0usize, |total, field| {
-            total + field.date_type.memory_size()
-        })
+    pub fn memory_size(&self, device: &crate::accelerator::Device) -> crate::Result<usize> {
+        let mut accumulator = 0usize;
+
+        for field in &self.fields {
+            accumulator += field.date_type.memory_size(device)?
+        }
+
+        Ok(accumulator)
     }
 }
 
