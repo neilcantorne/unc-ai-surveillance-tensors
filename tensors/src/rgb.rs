@@ -1,9 +1,9 @@
 use crate::reflection::{
-    AsKernelStruct,
     AsKernelType,
     StructInfo,
     Identifier,
-    FieldInfo
+    FieldInfo,
+    TypeInfo
 };
 
 pub struct Rgb<T>
@@ -20,35 +20,37 @@ impl<T> Default for Rgb<T>
     }
 }
 
-impl<T> AsKernelStruct for Rgb<T>
+impl<T> AsKernelType for Rgb<T>
     where T: Sized + Default + AsKernelType {
-    fn struct_info() -> StructInfo {
-        StructInfo {
-            identifier: Identifier::from("Rgb"),
-            fields: {
-                let mut fields = Vec::with_capacity(3);
-                
-                fields.push(FieldInfo {
-                    identifier: Identifier::from("r"),
-                    date_type: <T as AsKernelType>::type_info()
-                });
-
-                fields.push(FieldInfo {
-                    identifier: Identifier::from("g"),
-                    date_type: <T as AsKernelType>::type_info()
-                });
-
-                fields.push(FieldInfo {
-                    identifier: Identifier::from("b"),
-                    date_type: <T as AsKernelType>::type_info()
-                });
-
-                fields
-            },
-        }
+    fn type_info() -> TypeInfo {
+        TypeInfo::Struct(
+            StructInfo {
+                identifier: Identifier::from("Rgb"),
+                fields: {
+                    let mut fields = Vec::with_capacity(3);
+                    
+                    fields.push(FieldInfo {
+                        identifier: Identifier::from("r"),
+                        date_type: <T as AsKernelType>::type_info()
+                    });
+    
+                    fields.push(FieldInfo {
+                        identifier: Identifier::from("g"),
+                        date_type: <T as AsKernelType>::type_info()
+                    });
+    
+                    fields.push(FieldInfo {
+                        identifier: Identifier::from("b"),
+                        date_type: <T as AsKernelType>::type_info()
+                    });
+    
+                    fields
+                },
+            }
+        )
     }
 
-    fn write_to_memory(self, writer: &mut crate::reflection::ObjectWriter) {
+    fn write_to_memory(self, writer: &mut crate::accelerator::reflection::ObjectWriter) {
         unsafe { writer.write_unchecked(self); }
     }
 }
