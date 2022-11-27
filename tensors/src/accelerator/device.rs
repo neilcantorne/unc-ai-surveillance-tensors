@@ -8,6 +8,7 @@ pub(crate) trait DeviceInner {
     fn name(&self) -> crate::Result<String>;
     fn device_type(&self) -> crate::Result<DeviceType>;
     fn vendor(&self) -> crate::Result<String>;
+    fn pointer_size(&self) -> crate::Result<usize>;
 }
 
 impl Device {
@@ -24,6 +25,11 @@ impl Device {
     #[inline(always)]
     pub fn vendor(&self) -> crate::Result<String> {
         self.inner.vendor()
+    }
+
+    #[inline(always)]
+    pub fn pointer_size(&self) -> crate::Result<usize> {
+        self.inner.pointer_size()
     }
 }
 
@@ -109,6 +115,22 @@ impl DeviceInner for OpenClDevice {
             .to_result()?;
             
             buffer.rust_string()
+        }
+    }
+
+    fn pointer_size(&self) -> crate::Result<usize> {
+        unsafe {
+            let mut buffer: u32 = std::mem::MaybeUninit::uninit().assume_init();
+
+            self.open_cl.get_device_info(
+                self.id,
+                ParamName::DeviceAddressBits,
+                std::mem::size_of::<u32>(),
+                &mut buffer as *mut u32 as *mut (),
+                std::ptr::null_mut())
+            .to_result()?;
+
+            Ok(buffer as usize)
         }
     }
 }

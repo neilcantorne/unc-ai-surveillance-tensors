@@ -213,6 +213,7 @@ pub enum ParamName {
     DeviceType = 0x1000,
     DeviceMaxComputeUnits = 0x1002,
     DeviceMaxClockFrequency = 0x100C,
+    DeviceAddressBits = 0x100D,
     DeviceName = 0x102B,
     DeviceVendor = 0x102C,
     DriverVersion = 0x102D,
