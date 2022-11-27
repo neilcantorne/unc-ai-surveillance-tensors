@@ -6,6 +6,7 @@ mod struct_info;
 mod field_info;
 mod function_info;
 mod implementation_info;
+mod expression;
 mod object_writer;
 
 // Exports
@@ -28,3 +29,4 @@ pub use function_info::{
     ParameterVariants
 };
 pub use implementation_info::ImplementationInfo;
+pub use expression::Expression;
