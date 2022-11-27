@@ -137,3 +137,21 @@ impl<T: AsKernelType, const SIZE: usize> AsKernelType for [T; SIZE] {
         unsafe { writer.write_unchecked(self); }
     }
 }
+
+impl<'a, T> AsKernelType for &'a T
+    where T: Sized + AsKernelType {
+    fn type_info() -> TypeInfo { TypeInfo::Ref(Box::new(T::type_info())) }
+
+    fn write_to_memory(self, writer: &mut super::ObjectWriter) {
+        unsafe { writer.write_unchecked(self); }
+    }
+}
+
+impl<'a, T> AsKernelType for &'a mut T
+    where T: Sized + AsKernelType {
+    fn type_info() -> TypeInfo { TypeInfo::Ref(Box::new(T::type_info())) }
+
+    fn write_to_memory(self, writer: &mut super::ObjectWriter) {
+        unsafe { writer.write_unchecked(self); }
+    }
+}
