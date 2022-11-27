@@ -22,5 +22,9 @@ pub use type_info::{
 };
 pub use struct_info::StructInfo;
 pub use field_info::FieldInfo;
-pub use function_info::FunctionInfo;
+pub use function_info::{
+    FunctionInfo,
+    ParameterInfo,
+    ParameterVariants
+};
 pub use implementation_info::ImplementationInfo;
