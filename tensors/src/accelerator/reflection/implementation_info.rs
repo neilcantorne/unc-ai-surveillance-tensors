@@ -1,3 +1,4 @@
 pub struct ImplementationInfo {
-    trait_name: Option<super::Identifier>,
+    pub trait_name: Option<super::Identifier>,
+    pub functions: Vec<super::FunctionInfo>
 }
