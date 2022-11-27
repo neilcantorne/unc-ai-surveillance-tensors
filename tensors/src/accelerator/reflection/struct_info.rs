@@ -16,20 +16,3 @@ impl StructInfo {
         Ok(accumulator)
     }
 }
-
-pub trait AsKernelStruct : super::AsKernelType {
-    fn struct_info() -> StructInfo;
-    fn write_to_memory(self, writer: &mut super::ObjectWriter);
-}
-
-impl<T: AsKernelStruct> super::AsKernelType for T {
-    #[inline]
-    fn type_info() -> super::TypeInfo {
-        super::TypeInfo::Struct(Self::struct_info())
-    }
-
-    #[inline]
-    fn write_to_memory(self, writer: &mut super::ObjectWriter) {
-        <T as AsKernelStruct>::write_to_memory(self, writer)
-    }
-}

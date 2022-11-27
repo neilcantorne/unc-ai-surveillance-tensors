@@ -20,10 +20,7 @@ pub use type_info::{
     TypeInfo,
     AsKernelType
 };
-pub use struct_info::{
-    StructInfo,
-    AsKernelStruct
-};
+pub use struct_info::StructInfo;
 pub use field_info::FieldInfo;
 pub use function_info::FunctionInfo;
 pub use implementation_info::ImplementationInfo;
