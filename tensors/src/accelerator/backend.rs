@@ -285,4 +285,7 @@ extern "C" {
         il: *const i8,
         size: usize,
         error: *mut OpenClErrorCode) -> usize;
+
+    #[symbol(clReleaseContext)]
+    pub fn release_context(context: usize) -> OpenClErrorCode;
 }
