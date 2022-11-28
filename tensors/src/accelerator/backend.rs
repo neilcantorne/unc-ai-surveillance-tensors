@@ -220,6 +220,14 @@ pub enum ParamName {
     DeviceVersion = 0x102F,
 }
 
+#[repr(u32)]
+#[derive(Copy, Clone)]
+#[derive(PartialEq)]
+#[allow(unused)]
+pub enum ContextProperty {
+    ContextPlatform = 0x1084
+}
+
 #[macros::bind_open_cl]
 extern "C" {
     #[symbol(clGetDeviceIDs)]
@@ -237,4 +245,14 @@ extern "C" {
         param_value_size: usize,
         param_value: *mut (),
         param_value_size_ret: *mut usize) -> OpenClErrorCode;
+
+    #[symbol(clCreateContext)]
+    pub fn create_context(
+        properties: *const ContextProperty,
+        num_devices: u32,
+        device_ids: *const usize,
+        fn_notify: usize,
+        user_data: usize,
+        error: *mut OpenClErrorCode
+    ) -> usize;
 }
