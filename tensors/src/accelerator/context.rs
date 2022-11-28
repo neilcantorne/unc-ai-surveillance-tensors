@@ -13,3 +13,7 @@ pub(crate) struct OpenContext {
     pub context: usize,
     pub device: usize,
 }
+
+impl ContextInner for OpenContext {
+    
+}
