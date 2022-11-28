@@ -228,6 +228,15 @@ pub enum ContextProperty {
     ContextPlatform = 0x1084
 }
 
+#[repr(u64)]
+#[derive(Copy, Clone)]
+#[derive(PartialEq)]
+#[allow(unused)]
+pub enum CommandQueueProperties {
+    QueueOutOfOrderExecModeEnable = (1 << 0),
+    QueueProfilingEnable = (1 << 1)
+}
+
 #[macros::bind_open_cl]
 extern "C" {
     #[symbol(clGetDeviceIDs)]
@@ -253,6 +262,14 @@ extern "C" {
         device_ids: *const usize,
         fn_notify: usize,
         user_data: usize,
+        error: *mut OpenClErrorCode
+    ) -> usize;
+
+    #[symbol(clCreateCommandQueue)]
+    pub fn create_command_queue(
+        context: *const ContextProperty,
+        device: usize,
+        properties: CommandQueueProperties,
         error: *mut OpenClErrorCode
     ) -> usize;
 }
