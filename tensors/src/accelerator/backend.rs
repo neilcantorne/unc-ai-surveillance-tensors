@@ -278,4 +278,11 @@ extern "C" {
         program: usize,
         kernel_name: *const i8,
         error: *mut OpenClErrorCode) -> usize;
+    
+    #[symbol(clCreateProgramWithIL)]
+    pub fn create_program_with_il(
+        context: usize,
+        il: *const i8,
+        size: usize,
+        error: *mut OpenClErrorCode) -> usize;
 }
