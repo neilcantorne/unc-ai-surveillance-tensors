@@ -1,4 +1,4 @@
-use super::backend::{OpenCl, ParamName};
+use super::backend::{OpenCl, ParamName, ContextProperty};
 
 pub struct Device {
     pub(in crate::accelerator) inner: Box<dyn DeviceInner>
@@ -9,6 +9,7 @@ pub(crate) trait DeviceInner {
     fn device_type(&self) -> crate::Result<DeviceType>;
     fn vendor(&self) -> crate::Result<String>;
     fn pointer_size(&self) -> crate::Result<usize>;
+    fn create_context(&self) -> crate::Result<super::Context>;
 }
 
 impl Device {
@@ -30,6 +31,11 @@ impl Device {
     #[inline(always)]
     pub fn pointer_size(&self) -> crate::Result<usize> {
         self.inner.pointer_size()
+    }
+
+    #[inline(always)]
+    pub fn create_context(&self) -> crate::Result<super::Context> {
+        self.inner.create_context()
     }
 }
 
@@ -132,6 +138,30 @@ impl DeviceInner for OpenClDevice {
 
             Ok(buffer as usize)
         }
+    }
+
+    #[allow(invalid_value)]
+    fn create_context(&self) -> crate::Result<super::Context> {
+        Ok(super::Context {
+            inner: Box::new(super::context::OpenContext {
+                open_cl: self.open_cl.clone(),
+                context: unsafe {
+                    let mut error = std::mem::MaybeUninit::uninit().assume_init();
+
+                    let context = self.open_cl.create_context(
+                        std::ptr::null(),
+                        1u32, 
+                        &self.id,
+                        0usize,
+                        0usize,
+                        &mut error);
+
+                    error.to_result()?;
+                    context
+                },
+                device: self.id,
+            }),
+        })
     }
 }
 
