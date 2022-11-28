@@ -4,7 +4,7 @@ pub struct Context {
     pub(crate) inner: Box<dyn ContextInner>
 }
 
-pub(crate) trait ContextInner {
+pub(crate) trait ContextInner: Drop {
     
 }
 
@@ -16,4 +16,10 @@ pub(crate) struct OpenContext {
 
 impl ContextInner for OpenContext {
     
+}
+
+impl Drop for OpenContext {
+    fn drop(&mut self) {
+        unsafe { self.open_cl.release_context(self.context); }
+    }
 }
