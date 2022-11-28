@@ -272,4 +272,10 @@ extern "C" {
         properties: CommandQueueProperties,
         error: *mut OpenClErrorCode
     ) -> usize;
+
+    #[symbol(clCreateKernel)]
+    pub fn create_kernel(
+        program: usize,
+        kernel_name: *const i8,
+        error: *mut OpenClErrorCode) -> usize;
 }
