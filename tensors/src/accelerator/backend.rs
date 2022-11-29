@@ -288,4 +288,7 @@ extern "C" {
 
     #[symbol(clReleaseContext)]
     pub fn release_context(context: usize) -> OpenClErrorCode;
+    
+    #[symbol(clReleaseProgram)]
+    pub fn release_program(program: usize) -> OpenClErrorCode;
 }
