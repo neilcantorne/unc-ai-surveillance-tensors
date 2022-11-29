@@ -282,7 +282,7 @@ extern "C" {
     #[symbol(clCreateProgramWithIL)]
     pub fn create_program_with_il(
         context: usize,
-        il: *const i8,
+        il: *const u8,
         size: usize,
         error: *mut OpenClErrorCode) -> usize;
 

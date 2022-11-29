@@ -4,8 +4,15 @@ pub struct Context {
     pub(crate) inner: Box<dyn ContextInner>
 }
 
+impl Context {
+    #[inline(always)]
+    pub fn load_code(&self, code_data: &[u8]) -> crate::Result<super::Code> {
+        self.inner.load_code(code_data)
+    }
+}
+
 pub(crate) trait ContextInner: Drop {
-    
+    fn load_code(&self, code_data: &[u8]) -> crate::Result<super::Code>;
 }
 
 pub(crate) struct OpenContext {
@@ -15,7 +22,26 @@ pub(crate) struct OpenContext {
 }
 
 impl ContextInner for OpenContext {
-    
+    #[allow(invalid_value)]
+    fn load_code(&self, code_data: &[u8]) -> crate::Result<super::Code> {
+        Ok(super::Code {
+            inner: Box::new(super::code::OpenClCode {
+                open_cl: self.open_cl.clone(),
+                program: unsafe {
+                    let mut error = std::mem::MaybeUninit::uninit().assume_init();
+
+                    let program = self.open_cl.create_program_with_il(
+                        self.context,
+                        code_data.as_ptr(),
+                        code_data.len(),
+                        &mut error);
+                    
+                    error.to_result()?;
+                    program
+                }
+            })
+        })
+    }
 }
 
 impl Drop for OpenContext {

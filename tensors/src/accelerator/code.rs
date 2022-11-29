@@ -7,8 +7,8 @@ pub(crate) trait CodeInner: Drop {
 }
 
 pub(crate) struct OpenClCode {
-    open_cl: super::backend::OpenCl,
-    program: usize,
+    pub(crate) open_cl: super::backend::OpenCl,
+    pub(crate) program: usize,
 }
 
 impl CodeInner for OpenClCode {
