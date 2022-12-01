@@ -1,7 +1,7 @@
 use super::backend::OpenCl;
 
 pub struct Context {
-    pub(crate) inner: Box<dyn ContextInner>
+    pub(in crate::accelerator) inner: Box<dyn ContextInner>
 }
 
 impl Context {
@@ -11,11 +11,11 @@ impl Context {
     }
 }
 
-pub(crate) trait ContextInner: Drop {
+pub(in crate::accelerator) trait ContextInner: Drop {
     fn load_code(&self, code_data: &[u8]) -> crate::Result<super::Code>;
 }
 
-pub(crate) struct OpenContext {
+pub(in crate::accelerator) struct OpenContext {
     pub open_cl: OpenCl,
     pub context: usize,
     pub device: usize,

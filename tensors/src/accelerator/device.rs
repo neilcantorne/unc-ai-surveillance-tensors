@@ -1,10 +1,10 @@
-use super::backend::{OpenCl, ParamName, ContextProperty};
+use super::backend::{OpenCl, ParamName };
 
 pub struct Device {
     pub(in crate::accelerator) inner: Box<dyn DeviceInner>
 }
 
-pub(crate) trait DeviceInner {
+pub(in crate::accelerator) trait DeviceInner {
     fn name(&self) -> crate::Result<String>;
     fn device_type(&self) -> crate::Result<DeviceType>;
     fn vendor(&self) -> crate::Result<String>;
@@ -39,7 +39,7 @@ impl Device {
     }
 }
 
-pub(crate) struct OpenClDevice {
+pub(in crate::accelerator) struct OpenClDevice {
     pub open_cl: OpenCl,
     pub id: usize
 }

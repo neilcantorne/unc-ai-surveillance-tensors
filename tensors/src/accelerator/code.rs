@@ -1,7 +1,7 @@
 use std::ffi::CString;
 
 pub struct Code {
-    pub(crate) inner: Box<dyn CodeInner>
+    pub(in crate::accelerator) inner: Box<dyn CodeInner>
 }
 
 impl Code {
@@ -16,11 +16,11 @@ impl Code {
     }
 }
 
-pub(crate) trait CodeInner: Drop {
+pub(in crate::accelerator) trait CodeInner: Drop {
     fn get_kernel(&self, kernel_name: CString) -> crate::Result<super::Kernel<()>>;
 }
 
-pub(crate) struct OpenClCode {
+pub(in crate::accelerator) struct OpenClCode {
     pub(crate) open_cl: super::backend::OpenCl,
     pub(crate) program: usize,
 }

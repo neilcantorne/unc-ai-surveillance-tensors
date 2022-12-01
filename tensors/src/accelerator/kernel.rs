@@ -1,12 +1,12 @@
 pub struct Kernel<P: KernelParameter> {
-    pub(super) inner: Box<dyn KernelInner<P>>
+    pub(in crate::accelerator) inner: Box<dyn KernelInner<P>>
 }
 
-pub(crate) trait KernelInner<P: KernelParameter> {
+pub(in crate::accelerator) trait KernelInner<P: KernelParameter> {
     
 }
 
-pub(crate) struct OpenClKernel {
+pub(in crate::accelerator) struct OpenClKernel {
     pub(super) open_cl: super::backend::OpenCl,
     pub(super) kernel: usize,
 }
