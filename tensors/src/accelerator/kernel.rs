@@ -1,5 +1,5 @@
 pub struct Kernel<P: KernelParameter> {
-    inner: Box<dyn KernelInner<P>>
+    pub(super) inner: Box<dyn KernelInner<P>>
 }
 
 pub(crate) trait KernelInner<P: KernelParameter> {
@@ -16,5 +16,9 @@ impl<P: KernelParameter> KernelInner<P> for OpenClKernel {
 }
 
 pub trait KernelParameter {
+
+}
+
+impl KernelParameter for () {
 
 }
