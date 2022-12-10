@@ -1,3 +1,3 @@
 pub trait Layer {
-    fn prepare(&self);
+    fn build(&self, builder: &mut super::ModelBuilder) -> crate::Result<()>;
 }
