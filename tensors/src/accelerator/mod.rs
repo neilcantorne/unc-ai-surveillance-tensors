@@ -11,7 +11,7 @@ mod array_buffer;
 pub use device::Device;
 pub use context::Context;
 pub use code::Code;
-pub use kernel::{ Kernel, KernelParameter };
+pub use kernel::{ Kernel, KernelParameter, AsKernelArg };
 pub use factory::Factory;
 
 pub(crate) use backend::BackendError;
