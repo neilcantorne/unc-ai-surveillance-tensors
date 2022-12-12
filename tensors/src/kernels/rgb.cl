@@ -1,10 +1,6 @@
-typedef struct {
-    float r;
-    float g;
-    float b;
-} Rgb;
+#include "rgb.h"
 
-inline Rgb rgb_mul(Rgb a, Rgb b) {
+Rgb rgb_mul(Rgb a, Rgb b) {
     return (Rgb) {
         .r = a.r * b.r,
         .g = a.g * b.g,
@@ -12,15 +8,15 @@ inline Rgb rgb_mul(Rgb a, Rgb b) {
     };
 }
 
-inline void rgb_add_assign(Rgb* a, Rgb b) {
-    *a = (Rgb) {
-        .r = a->r * b.r,
-        .g = a->g * b.g,
-        .b = a->b * b.b,
+Rgb rgb_add(Rgb a, Rgb b) {
+    return (Rgb) {
+        .r = a.r * b.r,
+        .g = a.g * b.g,
+        .b = a.b * b.b,
     };
 }
 
-inline Rgb rgb_zero() {
+Rgb rgb_zero() {
     return (Rgb) {
         .r = 0,
         .g = 0,
