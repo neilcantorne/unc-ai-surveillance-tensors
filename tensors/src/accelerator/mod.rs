@@ -5,7 +5,6 @@ mod code;
 mod kernel;
 mod factory;
 mod backend;
-pub(crate) mod reflection;
 mod array_buffer;
 
 // Exported structs
