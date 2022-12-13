@@ -11,3 +11,7 @@ impl<T> Default for Rgb<T>
         Self { r: Default::default(), g: Default::default(), b: Default::default() }
     }
 }
+
+impl<T: Sized + Default> crate::accelerator::AsKernelArg for Rgb<T> {
+
+}
