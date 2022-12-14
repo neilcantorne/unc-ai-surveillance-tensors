@@ -1,6 +1,12 @@
-use crate::Rgb;
+use crate::{
+    Rgb,
+    accelerator::{ PushAsKernelArg, KernelArgsStack }, Tensor, Tensor3d
+};
 
-pub struct ConvolutionalLayer<const WIDTH: u32, const HEIGHT: u32> {
+pub struct ConvolutionalLayer<const FILTER_COUNT: usize,
+    const FILER_WIDTH: usize, const FILTER_HEIGHT: usize,
+    const INPUT_WIDTH: usize, const INPUT_HEIGHT: usize,
+    const OUTPUT_WIDTH: usize, const OUTPUT_HEIGHT: usize> {
 
 }
 
@@ -16,14 +22,30 @@ struct CnnParam {
     output_width: u32,
 }
 
-impl crate::accelerator::AsKernelArg for CnnParam {
-
+impl PushAsKernelArg for CnnParam {
+    fn push(&self, stack: &mut KernelArgsStack<'_>) {
+        let address = self as *const Self as *const ();
+        stack.push_c_buffer(address, std::mem::size_of::<Self>())
+    }
 }
 
-impl<const WIDTH: u32, const HEIGHT: u32> crate::dnn::LayerBuilder for ConvolutionalLayer<WIDTH,  HEIGHT> {
-    fn build(&self, builder: &mut crate::dnn::ModelBuilder) -> crate::Result<()> {
+impl<const FC: usize,
+    const FW: usize, const FH: usize,
+    const IW: usize, const IH: usize,
+    const OW: usize, const OH: usize>
+    crate::dnn::LayerBuilder for ConvolutionalLayer<FC, FW, FH, IW, IH, OH, OW> {
+    type Input = Tensor<Rgb<f32>, IH, IW>;
+    type Output = Tensor3d<Rgb<f32>, FC, OH, IW>;
+
+    fn build<'a>(&self,
+        builder: &'a mut crate::dnn::ModelBuilder,
+        input: crate::dnn::LayerBuffer<'a, Self::Input>)
+        -> crate::Result<crate::dnn::LayerBuffer<'a, Self::Output>> {
         let code = builder.load_binary_code(include_bytes!("../../kernels/spirv/cnn_kernel.spv"))?;
+        let output = builder.new_buffer(Tensor3d::<Rgb<f32>, FC, OH, IW>::default());
         let kernel = code.get_kernel::<(CnnParam, Rgb<f32>)>("")?;
-        Ok(())
+
+        Ok(output)
     }
+
 }
