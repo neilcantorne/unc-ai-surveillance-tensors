@@ -143,6 +143,8 @@ impl<'a> KernelArgsStackInner<'a> for OpenClKernelArgsStack<'a> {
                 4,
                 &value as *const i32 as *const ());
         };
+
+        self.index_counter += 1;
     }
 
     fn push_i64(&mut self, value: i64) {
@@ -153,5 +155,7 @@ impl<'a> KernelArgsStackInner<'a> for OpenClKernelArgsStack<'a> {
                 8,
                 &value as *const i64 as *const ());
         };
+
+        self.index_counter += 1;
     }
 }
