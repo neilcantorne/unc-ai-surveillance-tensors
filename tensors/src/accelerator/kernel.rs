@@ -1,9 +1,17 @@
+use impl_trait_for_tuples::impl_for_tuples;
+
 pub struct Kernel<P: KernelParameter> {
     pub(in crate::accelerator) inner: Box<dyn KernelInner<P>>
 }
 
-pub(in crate::accelerator) trait KernelInner<P: KernelParameter> {
+impl<P: KernelParameter> Kernel<P> {
+    pub fn invoke(&self, args: P) -> crate::Result<()> {
+        self.inner.invoke(args)
+    }
+}
 
+pub(in crate::accelerator) trait KernelInner<P: KernelParameter> {
+    fn invoke(&self, args: P) -> crate::Result<()>;
 }
 
 pub(in crate::accelerator) struct OpenClKernel {
@@ -12,32 +20,33 @@ pub(in crate::accelerator) struct OpenClKernel {
 }
 
 impl<P: KernelParameter> KernelInner<P> for OpenClKernel {
+    fn invoke(&self, args: P) -> crate::Result<()> {
+        let mut stack_inner = super::kernel_args_stack::OpenClKernelArgsStack {
+            kernel: self,
+            index_counter: 0,
+        };
 
-}
+        args.push_args(&mut super::KernelArgsStack {
+            inner: &mut stack_inner,
+        });
 
-pub trait AsKernelArg {
-
-}
-
-pub trait KernelParameter { }
-
-impl KernelParameter for () { }
-
-macro_rules! tuple_impls {
-    ( $( $name:ident )+ ) => {
-        impl<$($name: AsKernelArg),+> KernelParameter for ($($name,)+) { }
+        Ok(())
     }
 }
 
-tuple_impls! { T1 }
-tuple_impls! { T1 T2  }
-tuple_impls! { T1 T2  T3 }
-tuple_impls! { T1 T2  T3 T4 }
-tuple_impls! { T1 T2  T3 T4 T5 }
-tuple_impls! { T1 T2  T3 T4 T5 T6 }
-tuple_impls! { T1 T2  T3 T4 T5 T6 T7 }
-tuple_impls! { T1 T2  T3 T4 T5 T6 T7 T8 }
-tuple_impls! { T1 T2  T3 T4 T5 T6 T7 T8 T9 }
-tuple_impls! { T1 T2  T3 T4 T5 T6 T7 T8 T9 T10}
-tuple_impls! { T1 T2  T3 T4 T5 T6 T7 T8 T9 T10 T11 }
-tuple_impls! { T1 T2  T3 T4 T5 T6 T7 T8 T9 T10 T11 T12 }
+pub trait PushAsKernelArg {
+    fn push(&self, stack: &mut super::KernelArgsStack<'_>);
+}
+
+pub trait KernelParameter {
+    fn push_args<'a>(&self, stack: &'a mut super::KernelArgsStack<'a>);
+}
+
+#[impl_for_tuples(0, 12)]
+#[tuple_types_custom_trait_bound(PushAsKernelArg)]
+impl KernelParameter for Tuple {
+    #[inline]
+    fn push_args<'a>(&self, stack: &'a mut super::KernelArgsStack<'a>) {
+        for_tuples!( #( PushAsKernelArg::push(&self.Tuple, stack); )* );
+    }
+}
