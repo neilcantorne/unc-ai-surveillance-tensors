@@ -6,6 +6,9 @@ fn main() {
 }
 
 fn build_cl_sources() {
+    println!("cargo:rerun-if-changed=src/kernels/cnn_kernel.cl");
+    println!("cargo:rerun-if-changed=src/kernels/rgb.cl");
+
     let rgb_ir = cl_to_llvm_ir(Path::new("rgb.cl"));
     let cnn_kernel_ir = cl_to_llvm_ir(Path::new("cnn_kernel.cl"));
     link_to_spirv([&rgb_ir, &cnn_kernel_ir], "cnn_kernel");
