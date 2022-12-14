@@ -3,7 +3,7 @@ use std::{fmt::{Debug, Display, Write}, ops::{Index, IndexMut}};
 #[derive(Clone, Copy)]
 pub struct Tensor<T, const ROW: usize, const COLUMN: usize>([[T; COLUMN]; ROW]);
 
-impl<T, const ROW: usize, const COLUMN: usize> Tensor<T, ROW, COLUMN> 
+impl<T, const ROW: usize, const COLUMN: usize> Tensor<T, ROW, COLUMN>
     where T: Copy {
 
     pub fn filled_with(value: T) -> Self {
@@ -53,7 +53,7 @@ impl<T, const ROW: usize, const COLUMN: usize> Display for Tensor<T, ROW, COLUMN
 
         loop {
             self.0[r][c].fmt(f)?;
-            
+
             c += 1;
 
             if c < COLUMN {
@@ -68,7 +68,7 @@ impl<T, const ROW: usize, const COLUMN: usize> Display for Tensor<T, ROW, COLUMN
     }
 }
 
-impl<T, const ROW: usize, const COLUMN: usize> Debug for Tensor<T, ROW, COLUMN> 
+impl<T, const ROW: usize, const COLUMN: usize> Debug for Tensor<T, ROW, COLUMN>
     where T: Display {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         <Self as Display>::fmt(&self, f)
@@ -116,9 +116,17 @@ impl<T, const COLUMN: usize> IndexMut<usize> for Tensor<T, 1, COLUMN> {
 
 impl<T, const ROW: usize, const COLUMN: usize> From<[[T; COLUMN]; ROW]> for Tensor<T, ROW, COLUMN>
     where T: Copy {
-    
+
     fn from(array: [[T; COLUMN]; ROW]) -> Self {
         Self (array)
+    }
+}
+
+
+impl<T: Sized, const ROW: usize, const COLUMN: usize> crate::accelerator::PushAsKernelArg for Tensor<T, ROW, COLUMN> {
+    fn push(&self, stack: &mut crate::accelerator::KernelArgsStack<'_>) {
+        let address = self as *const Self as *const ();
+        stack.push_c_buffer(address, std::mem::size_of::<Self>())
     }
 }
 
@@ -182,7 +190,7 @@ impl<T> crate::ops::CrossProduct for Tensor<T, 1, 3>
             [[
                 self.y() * operand.z() - operand.z() * self.y(),
                 self.z() * operand.x() - operand.x() * self.z(),
-                self.x() * operand.y() - operand.y() * self.x() 
+                self.x() * operand.y() - operand.y() * self.x()
             ]]
         )
     }
@@ -225,7 +233,7 @@ impl<'a, T, const ROW: usize, const COLUMN: usize> Iterator for HorizontalIter<'
         if self.index_c >= COLUMN {
             self.index_c = 0;
             self.index_r += 1;
-            
+
             if self.index_r >= ROW { return None; }
         }
 
@@ -236,7 +244,7 @@ impl<'a, T, const ROW: usize, const COLUMN: usize> Iterator for HorizontalIter<'
         ));
 
         self.index_c += 1;
-        
+
         return next;
     }
 }
@@ -255,7 +263,7 @@ impl<'a, T, const ROW: usize, const COLUMN: usize> Iterator for VerticalIter<'a,
         if self.index_r >= ROW {
             self.index_r = 0;
             self.index_c += 1;
-            
+
             if self.index_c >= COLUMN { return None; }
         }
 
@@ -266,7 +274,7 @@ impl<'a, T, const ROW: usize, const COLUMN: usize> Iterator for VerticalIter<'a,
         ));
 
         self.index_r += 1;
-        
+
         return next;
     }
 }
