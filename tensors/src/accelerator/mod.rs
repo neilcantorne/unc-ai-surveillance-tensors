@@ -12,7 +12,7 @@ mod array_buffer;
 pub use device::Device;
 pub use context::Context;
 pub use code::Code;
-pub use kernel::{ Kernel, KernelParameter, AsKernelArg };
+pub use kernel::{ Kernel, KernelParameter, PushAsKernelArg };
 pub use kernel_args_stack::KernelArgsStack;
 pub use factory::Factory;
 
