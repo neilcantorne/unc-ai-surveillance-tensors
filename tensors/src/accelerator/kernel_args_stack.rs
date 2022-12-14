@@ -52,38 +52,106 @@ pub(in crate::accelerator) struct OpenClKernelArgsStack<'a> {
 
 impl<'a> KernelArgsStackInner<'a> for OpenClKernelArgsStack<'a> {
     fn push_c_buffer(&mut self, address: *const(), size: usize) {
-        //TODO: Implement
+        unsafe {
+            self.kernel.open_cl.set_kernel_arg(
+                self.kernel.kernel,
+                self.index_counter,
+                size,
+                address);
+        };
+
+        self.index_counter += 1;
     }
 
     fn push_u8(&mut self, value: u8) {
-        //TODO: Implement
+        unsafe {
+            self.kernel.open_cl.set_kernel_arg(
+                self.kernel.kernel,
+                self.index_counter,
+                1,
+                &value as *const u8 as *const ());
+        };
+
+        self.index_counter += 1;
     }
 
     fn push_u16(&mut self, value: u16) {
-        //TODO: Implement
+        unsafe {
+            self.kernel.open_cl.set_kernel_arg(
+                self.kernel.kernel,
+                self.index_counter,
+                2,
+                &value as *const u16 as *const ());
+        };
+
+        self.index_counter += 1;
     }
 
     fn push_u32(&mut self, value: u32) {
-        //TODO: Implement
+        unsafe {
+            self.kernel.open_cl.set_kernel_arg(
+                self.kernel.kernel,
+                self.index_counter,
+                4,
+                &value as *const u32 as *const ());
+        };
+
+        self.index_counter += 1;
     }
 
     fn push_u64(&mut self, value: u64) {
-        //TODO: Implement
+        unsafe {
+            self.kernel.open_cl.set_kernel_arg(
+                self.kernel.kernel,
+                self.index_counter,
+                8,
+                &value as *const u64 as *const ());
+        };
+
+        self.index_counter += 1;
     }
 
     fn push_i8(&mut self, value: i8) {
-        //TODO: Implement
+        unsafe {
+            self.kernel.open_cl.set_kernel_arg(
+                self.kernel.kernel,
+                self.index_counter,
+                1,
+                &value as *const i8 as *const ());
+        };
+
+        self.index_counter += 1;
     }
 
     fn push_i16(&mut self, value: i16) {
-        //TODO: Implement
+        unsafe {
+            self.kernel.open_cl.set_kernel_arg(
+                self.kernel.kernel,
+                self.index_counter,
+                2,
+                &value as *const i16 as *const ());
+        };
+
+        self.index_counter += 1;
     }
 
     fn push_i32(&mut self, value: i32) {
-        //TODO: Implement
+        unsafe {
+            self.kernel.open_cl.set_kernel_arg(
+                self.kernel.kernel,
+                self.index_counter,
+                4,
+                &value as *const i32 as *const ());
+        };
     }
 
     fn push_i64(&mut self, value: i64) {
-        //TODO: Implement
+        unsafe {
+            self.kernel.open_cl.set_kernel_arg(
+                self.kernel.kernel,
+                self.index_counter,
+                8,
+                &value as *const i64 as *const ());
+        };
     }
 }

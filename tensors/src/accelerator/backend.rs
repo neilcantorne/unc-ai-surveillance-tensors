@@ -278,7 +278,10 @@ extern "C" {
         program: usize,
         kernel_name: *const i8,
         error: *mut OpenClErrorCode) -> usize;
-    
+
+    #[symbol(clSetKernelArg)]
+    pub fn set_kernel_arg (kernel: usize, index: u32, size: usize, buffer: *const ());
+
     #[symbol(clCreateProgramWithIL)]
     pub fn create_program_with_il(
         context: usize,
@@ -288,7 +291,7 @@ extern "C" {
 
     #[symbol(clReleaseContext)]
     pub fn release_context(context: usize) -> OpenClErrorCode;
-    
+
     #[symbol(clReleaseProgram)]
     pub fn release_program(program: usize) -> OpenClErrorCode;
 }
